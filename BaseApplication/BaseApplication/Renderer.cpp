@@ -1,18 +1,24 @@
 #include "Renderer.h"
 
-Renderer::Renderer()
-{
-}
-
-Renderer::~Renderer()
-{
-}
-
-Window* Renderer::init()
-{
+namespace Hollow {
 
 
 
+	Renderer::Renderer()
+	{
 
-	return nullptr;
+	}
+
+	Renderer::~Renderer()
+	{
+
+	}
+
+	void Renderer::init()
+	{
+
+
+	}
+
+
 }

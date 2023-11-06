@@ -1,29 +1,29 @@
 #pragma once
 
-#include "Window.h"
 
 
 #include <iostream>
 
 
-class Renderer
-{
-
-public:
-
-	Renderer();
-	~Renderer();
-
-	Window* init();
+namespace Hollow {
 
 
+	class Renderer
+	{
 
-private:
+	public:
 
-	///GLFWwindow* window = nullptr;
-	Window* window = nullptr;
+		Renderer();
+		~Renderer();
+
+		void init();
 
 
 
-};
+	private:
 
+
+
+	};
+
+}

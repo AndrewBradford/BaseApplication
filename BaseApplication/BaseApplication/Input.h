@@ -1,18 +1,22 @@
 #pragma once
 
 
+namespace Hollow {
 
-class Input
-{
-
-
-public:
+	class Input
+	{
 
 
+	public:
 
 
-private:
 
 
-};
+	private:
 
+
+
+
+	};
+
+}
