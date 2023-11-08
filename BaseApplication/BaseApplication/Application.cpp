@@ -4,6 +4,8 @@
 #include <iostream>
 
 
+#include "StateBase.h"
+
 namespace Hollow {
 
 
@@ -21,6 +23,14 @@ namespace Hollow {
 	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	{
 		glViewport(0, 0, width, height);
+	}
+
+	void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+	{
+		Application* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+		app->input.mousex = xpos;
+		app->input.mousey = ypos;
+
 	}
 
 	bool Application::Init(const char* name, int w, int h)
@@ -59,12 +69,21 @@ namespace Hollow {
 		}
 
 
-		//glfwSetWindowUserPointer(window, this);
+		glfwSetWindowUserPointer(window, this);
 
 		glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+		glfwSetCursorPosCallback(window, mouse_callback);
+
+
+
 
 		lastFrame = glfwGetTime();
 
+
+		currentState = new Hollow::StateBase();
+
+
+		glEnable(GL_DEPTH_TEST);
 
 		return true;
 
@@ -74,6 +93,7 @@ namespace Hollow {
 	{
 
 		glfwTerminate();
+		currentState->~StateBase();
 
 	}
 
@@ -81,6 +101,8 @@ namespace Hollow {
 	{
 
 
+
+		currentState->Init(window);
 
 		// the game loop
 		while (!glfwWindowShouldClose(window))
@@ -93,16 +115,14 @@ namespace Hollow {
 			std::cout << 1.f / deltaTime << " FPS" << std::endl;
 
 
-			//check for changing state
+			//check for changing state?
 
 
 			//deal with inputs
 			processInputs();
 
-			//update current state
-
-
-			//render the current state
+			//update current state + render
+			currentState->frame(deltaTime, window, &input);
 
 
 			//end of frame stuff
@@ -128,6 +148,46 @@ namespace Hollow {
 		}
 
 
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			input.setKeyDown(Input::KEYS::W);
+		}
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE)
+		{
+			input.setKeyUp(Input::KEYS::W);
+		}
+		
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			input.setKeyDown(Input::KEYS::S);
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE)
+		{
+			input.setKeyUp(Input::KEYS::S);
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			input.setKeyDown(Input::KEYS::D);
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
+		{
+			input.setKeyUp(Input::KEYS::D);
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			input.setKeyDown(Input::KEYS::A);
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE)
+		{
+			input.setKeyUp(Input::KEYS::A);
+		}
+
 	}
 
+
+
+
 }
+

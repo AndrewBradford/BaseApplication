@@ -10,6 +10,8 @@
 namespace Hollow {
 
 
+	class StateBase;
+
 	class Application
 	{
 
@@ -28,13 +30,12 @@ namespace Hollow {
 		void Run();
 
 
-
+		Input input;
 
 
 	private:
 
 		void processInputs();
-
 
 
 		GLFWwindow* window = nullptr;
@@ -43,7 +44,8 @@ namespace Hollow {
 		float lastFrame = 0.0f;
 		float currentFrame = 0.0f;
 
-		Input input;
+
+		Hollow::StateBase* currentState;
 
 	};
 
