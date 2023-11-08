@@ -203,9 +203,10 @@ namespace Hollow {
 
 			cam.calculateDirectionFromAngles();
 		*/
-
-		camera.ProcessMouseMovement(xoffset, yoffset);
-
+		if (in->mouseCaptured)
+		{
+			camera.ProcessMouseMovement(xoffset, yoffset);
+		}
 
 	}
 

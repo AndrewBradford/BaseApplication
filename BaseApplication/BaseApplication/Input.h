@@ -48,6 +48,9 @@ namespace Hollow {
 
 		bool firstMouse = true;
 
+
+		bool mouseCaptured = false;
+
 	private:
 
 		bool keyStates[5] = { false };

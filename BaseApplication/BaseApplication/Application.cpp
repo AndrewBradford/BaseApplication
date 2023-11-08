@@ -3,6 +3,9 @@
 
 #include <iostream>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 #include "StateBase.h"
 
@@ -30,6 +33,25 @@ namespace Hollow {
 		Application* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
 		app->input.mousex = xpos;
 		app->input.mousey = ypos;
+
+	}
+
+	void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+	{
+		Application* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			app->input.mouseCaptured = true;
+		}
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			app->input.mouseCaptured = false;
+		}
+
+
 
 	}
 
@@ -61,7 +83,7 @@ namespace Hollow {
 		}
 
 
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		if (glfwRawMouseMotionSupported())
 		{
@@ -73,7 +95,7 @@ namespace Hollow {
 
 		glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 		glfwSetCursorPosCallback(window, mouse_callback);
-
+		glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 
 
@@ -84,6 +106,19 @@ namespace Hollow {
 
 
 		glEnable(GL_DEPTH_TEST);
+
+
+		//set up imgui context
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+		// Setup Platform/renderer backends
+		ImGui_ImplGlfw_InitForOpenGL(window, true);
+		ImGui_ImplOpenGL3_Init();
+
 
 		return true;
 
@@ -114,6 +149,12 @@ namespace Hollow {
 
 			std::cout << 1.f / deltaTime << " FPS" << std::endl;
 
+			//start ImGui frame
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+			ImGui::ShowDemoWindow();
+
 
 			//check for changing state?
 
@@ -125,13 +166,21 @@ namespace Hollow {
 			currentState->frame(deltaTime, window, &input);
 
 
+
+			//render imgui
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
 			//end of frame stuff
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 
 		}
 
-
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
 
 
 	}
