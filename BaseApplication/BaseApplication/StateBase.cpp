@@ -9,6 +9,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 
 namespace Hollow {
 
@@ -60,6 +64,7 @@ namespace Hollow {
 	void StateBase::frame(float dt, GLFWwindow* window, Input* in)
 	{
 
+		frameTime = 1.f / dt;
 
 		// handle inputs
 		processInput(dt, window, in);
@@ -74,6 +79,8 @@ namespace Hollow {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		if (wireFrameToggle) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
+		else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 
 		//projection and view matrices
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
@@ -134,6 +141,9 @@ namespace Hollow {
 
 		glBindVertexArray(0);
 
+
+
+		gui();
 
 
 	}
@@ -213,6 +223,26 @@ namespace Hollow {
 
 	void StateBase::Cleanup()
 	{
+
+
+	}
+
+	void StateBase::gui()
+	{
+
+
+		ImGui::Text("FPS: %.2f", frameTime);
+		ImGui::Checkbox("debug", &debugBool);
+		ImGui::Checkbox("Wireframe Mode", &wireFrameToggle);
+
+
+		float cols[3] = { light.color.r, light.color.g, light.color.b };
+		ImGui::ColorPicker3("Light Color", cols);
+		light.color.r = cols[0];
+		light.color.g = cols[1];
+		light.color.b = cols[2];
+
+
 
 
 	}

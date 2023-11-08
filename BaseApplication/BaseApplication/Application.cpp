@@ -147,13 +147,13 @@ namespace Hollow {
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
 
-			std::cout << 1.f / deltaTime << " FPS" << std::endl;
+			//std::cout << 1.f / deltaTime << " FPS" << std::endl;
 
 			//start ImGui frame
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
-			ImGui::ShowDemoWindow();
+			//ImGui::ShowDemoWindow();
 
 
 			//check for changing state?

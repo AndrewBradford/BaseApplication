@@ -47,6 +47,8 @@ namespace Hollow {
 		void Cleanup();
 
 
+		void gui();
+
 	private:
 
 		Camera camera;
@@ -60,6 +62,15 @@ namespace Hollow {
 		GObject lightCube;
 
 		Light light;
+
+
+		//gui variables
+		float frameTime = 0.0f;
+		bool debugBool = false;
+		bool wireFrameToggle = false;
+
+
+
 
 
 	};
