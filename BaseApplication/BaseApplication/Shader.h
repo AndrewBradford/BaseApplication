@@ -94,7 +94,7 @@ namespace Hollow {
 		};
 		~FlatShader() {};
 
-		void UseShader(glm::mat4& model, glm::mat4& view, glm::mat4& proj);
+		void UseShader(glm::mat4& model, glm::mat4& view, glm::mat4& proj, glm::vec3 objectCol);
 
 	};
 

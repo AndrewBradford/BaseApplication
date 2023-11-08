@@ -83,7 +83,7 @@ namespace Hollow {
 		else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 
 		//projection and view matrices
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1440.0f / 960.0f, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 model = glm::mat4(1.0f);
 
@@ -104,7 +104,7 @@ namespace Hollow {
 		model = glm::translate(model, lightCube.position);
 		model = glm::scale(model, lightCube.scale);
 
-		shaders.flatShader.UseShader(model, view, projection);
+		shaders.flatShader.UseShader(model, view, projection, light.color);
 		Geometry::DrawVArray(cubeV);
 
 

@@ -165,7 +165,11 @@ namespace Hollow {
 			//update current state + render
 			currentState->frame(deltaTime, window, &input);
 
-
+			if (ImGui::Button("Exit Application"))
+			{
+				glfwSetWindowShouldClose(window, true);
+			}
+			
 
 			//render imgui
 			ImGui::Render();

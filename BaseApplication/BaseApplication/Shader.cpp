@@ -114,7 +114,7 @@ namespace Hollow {
 
 	}
 
-	void FlatShader::UseShader(glm::mat4& model, glm::mat4& view, glm::mat4& proj)
+	void FlatShader::UseShader(glm::mat4& model, glm::mat4& view, glm::mat4& proj, glm::vec3 objectCol)
 	{
 
 		glUseProgram(ID);
@@ -125,6 +125,8 @@ namespace Hollow {
 		setMatrix4f("view", view);
 		setMatrix4f("projection", proj);
 
+		//fragment shader
+		setVec3("objectColor", objectCol);
 
 	}
 

@@ -52,7 +52,6 @@ namespace Hollow {
 		//bind VAO
 		glBindVertexArray(VAO.ID);
 
-		std::cout << shape->getVertexSize();
 
 		//bind and set VBO
 		glBindBuffer(GL_ARRAY_BUFFER, VBO.ID);
