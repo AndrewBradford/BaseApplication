@@ -1,6 +1,4 @@
 
-// largely from learnopengl
-
 #ifndef SHADER_H
 #define SHADER_H
 

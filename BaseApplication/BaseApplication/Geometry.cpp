@@ -13,10 +13,6 @@ namespace Hollow {
 	{
 
 
-
-
-
-
 		VBuffer VBO;
 		EBuffer EBO;
 		VArray VAO;
