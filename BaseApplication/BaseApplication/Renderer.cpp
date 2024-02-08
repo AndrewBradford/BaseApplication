@@ -6,6 +6,17 @@
 #include "stb_image.h"
 
 
+
+
+//
+//	FILE CURRENTLY UNUSED
+//	FUNCTIONALITY MOVED TO GEOMETRY CLASS
+// 
+//	will remain until I figure out what to do with the texture loading functionality
+// 
+
+
+
 namespace Hollow {
 
 

@@ -16,6 +16,10 @@
 
 
 
+//
+//	FILE CURRENTLY UNUSED
+//	FUNCTIONALITY MOVED TO GEOMETRY CLASS
+// 
 
 namespace Hollow {
 

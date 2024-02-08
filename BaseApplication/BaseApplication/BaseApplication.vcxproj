@@ -71,20 +71,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Jimmy\Documents\Visual Studio 2022\Libraries\OpenGL\includes;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Jimmy\Documents\Visual Studio 2022\Libraries\OpenGL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\Jimmy\Documents\Visual Studio 2022\Libraries\OpenGL\includes;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Jimmy\Documents\Visual Studio 2022\Libraries\OpenGL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\Jimmy\Documents\Visual Studio 2022\Libraries\OpenGL\includes;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Jimmy\Documents\Visual Studio 2022\Libraries\OpenGL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\Jimmy\Documents\Visual Studio 2022\Libraries\OpenGL\includes;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\Jimmy\Documents\Visual Studio 2022\Libraries\OpenGL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
