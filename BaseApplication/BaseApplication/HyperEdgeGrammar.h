@@ -14,40 +14,19 @@ struct Hyperedge;
 // a single node
 struct Node
 {
-	int sub_node_ID;
-	int node_ID;
-
-	std::list<int> edges_source;
-	std::list<int> edges_target;
-
-	std::list<int> hyperedges;
-
-	void remove_hyperedge(int id);
-
-	//
 
 	std::list<Edge*> edges_source_ptrs;
 	std::list<Edge*> edges_target_ptrs;
 
 	std::list<Hyperedge*> hyperedges_ptrs;
 
+	void remove_hyperedge(int id);
 
 };
 
 // a unidirectional non-hyper edge
 struct Edge
 {
-	int sub_edge_ID;
-	int edge_ID;
-
-	int source_node_ID;
-	int target_node_ID;
-
-	int source_node_sub_ID;
-	int target_node_sub_ID;
-
-	//
-
 	Node* source_node_ptr;
 	Node* target_node_ptr;
 
@@ -56,18 +35,11 @@ struct Edge
 // hyperedge
 struct Hyperedge
 {
-	int sub_hyperedge_ID;
-	int hyperedge_ID;
-
 	int type;
-	std::vector<int> sub_attachment_nodes;
-	std::vector<int> attachment_nodes;
-
 	NTLabel label;
-
-	//
-
 	std::vector<Node*> attachment_nodes_ptrs;
+
+	int id;
 
 };
 
@@ -87,12 +59,8 @@ struct Graph
 	std::vector<Edge> edges;
 
 	std::list<Hyperedge> hyperedges;
-	int next_hyperedge_id;
 
-	int get_next_hyperedge_to_transform();
-	Hyperedge* get_hyperedge_from_id(int id);
-
-	Node* get_node_from_id(int id);
+	Hyperedge* get_next_hyperedge_to_transform();
 
 	void remove_hyperedge(int id);
 
@@ -108,7 +76,7 @@ struct subGraph
 
 
 	int type;
-	std::vector<int> external_nodes;
+	std::vector<Node*> external_nodes;
 
 	Node* get_external_node(int index);
 	Node* get_node_from_sub_id(int sub_id);

@@ -22,8 +22,7 @@ void HyperEdgeGrammar::single_transformation()
 
 
 	// identify hyperedge to be replaced
-	int hyperedge_to_replace_ID = graph.get_next_hyperedge_to_transform();
-	Hyperedge* hyperedge_to_replace = graph.get_hyperedge_from_id(hyperedge_to_replace_ID);
+	Hyperedge* hyperedge_to_replace = graph.get_next_hyperedge_to_transform();
 
 
 	// identify production rule to apply
@@ -50,82 +49,98 @@ void HyperEdgeGrammar::single_transformation()
 
 
 
-	// remove references to hyperedge from attached nodes
-	for (int n : hyperedge_to_replace->attachment_nodes)
+	//		remove references to hyperedge from attached nodes
+	for (Node* n : hyperedge_to_replace->attachment_nodes_ptrs)
 	{
-		graph.get_node_from_id(n)->remove_hyperedge(hyperedge_to_replace_ID);
+		n->remove_hyperedge(hyperedge_to_replace->id);
 	}
 
 
-	// attach subgraph of production to graph
+	//		attach subgraph of production to graph
 	subGraph* replacing_structure = &rule_to_apply->rhs;
 
-	//		copy each (non-external) node, edge and hyperedge from subgraph into graph
-				// assign each node, edge and hyperedge in subgraph a new graph id
-
-	//		assign each subgraph node a graph id and copy into graph
+	
+	GraphMapping graph_map;
+	
+	//			map each node in subgraph to new node in graph
 	for (Node& n : replacing_structure->nodes)
 	{
 		bool is_external = false;
 		for (int i = 0; i < replacing_structure->external_nodes.size(); i++)
 		{
-			// external nodes should be merged with corresponding attachment node
-			if (replacing_structure->external_nodes[i] == n.sub_node_ID)
+			// external nodes should be mapped to corresponding attachment node
+			if (replacing_structure->external_nodes[i] == &n)
 			{
 				int external_number = i;
 				// find corresponding attachment node graph id
-				n.node_ID = hyperedge_to_replace->attachment_nodes[external_number];
+				graph_map.node_map[&n] = hyperedge_to_replace->attachment_nodes_ptrs[external_number];
 
 				is_external = true;
 			}
 		}
 		if (is_external) { continue; }
-		n.node_ID = graph.nodes.size();
+
 		graph.nodes.push_back(n);
+		graph_map.node_map[&n] = &graph.nodes.back();
+
 	}
 
-	//			assign each edge and hyperedge a graph id and copy into graph
-	//			update ids of attached subgraph nodes to new graph ids
+	//			map each edge and hyperedge in subgraph to new one in graph
 	for (Edge& e : replacing_structure->edges)
 	{
-		e.source_node_ID = replacing_structure->get_node_from_sub_id(e.source_node_sub_ID)->node_ID;
-		e.target_node_ID = replacing_structure->get_node_from_sub_id(e.target_node_sub_ID)->node_ID;
-		e.edge_ID = graph.edges.size();
+
 		graph.edges.push_back(e);
+		graph_map.edge_map[&e] = &graph.edges.back();
+
 	}
+
 	for (Hyperedge& h : replacing_structure->hyperedges)
 	{
-		// update each attachment node id
-		for (int n : h.sub_attachment_nodes)
-		{
-			int new_id = replacing_structure->get_node_from_sub_id(n)->node_ID;
-			h.attachment_nodes.push_back(new_id);
-		}
 
-		h.hyperedge_ID = graph.next_hyperedge_id;
 		graph.hyperedges.push_back(h);
-		++graph.next_hyperedge_id;
+		graph_map.hyperedge_map[&h] = &graph.hyperedges.back();
+
+
 	}
 
-	/*
-	//		glue each attachment node in hyperedge 
-	//		to corresponding external node in subgraph
-	for (int i = 0; i < hyperedge_to_replace->type; i++)
+	//			pass over each node, edge and hyperedge again
+	//			replace each pointer with the mapped pointer
+	for (Node& n : replacing_structure->nodes)
 	{
-		// get attachment node
-		Node* attachment_node = graph.get_node_from_id(hyperedge_to_replace->attachment_nodes[i]);
-		// find matching external node in subgraph
-		Node* external_node = replacing_structure->get_external_node(i);
+		for (Edge*& e : n.edges_source_ptrs)
+		{
+			e = graph_map.edge_map[e];
+		}
 
-		// find edges and hyperedges which connect to that node
+		for (Edge*& e : n.edges_target_ptrs)
+		{
+			e = graph_map.edge_map[e];
+		}
+
+		for (Hyperedge*& h : n.hyperedges_ptrs)
+		{
+			h = graph_map.hyperedge_map[h];
+		}
+
+	}
+
+	for (Edge& e : replacing_structure->edges)
+	{
+		e.source_node_ptr = graph_map.node_map[e.source_node_ptr];
+		e.target_node_ptr = graph_map.node_map[e.target_node_ptr];
+	}
+
+	for (Hyperedge& h : replacing_structure->hyperedges)
+	{
+		for (Node*& n : h.attachment_nodes_ptrs)
+		{
+			n = graph_map.node_map[n];
+		}
+	}
 
 
-	}*/
-
-
-
-	// delete hyperedge
-	graph.remove_hyperedge(hyperedge_to_replace_ID);
+	//		delete hyperedge
+	graph.remove_hyperedge(hyperedge_to_replace->id);
 
 
 
