@@ -3,95 +3,125 @@
 #include <vector>
 #include <list>
 #include <map>
-
+#include <set>
+#include <string>
 
 #include <glm/glm.hpp>
 
-enum class NTLabel {S};
+enum class HyperedgeLabel { S };
+enum class EdgeLabel { a };
 
-struct Edge;
-struct Hyperedge;
+class Edge;
+class Hyperedge;
+class Graph;
 
 // a single node
-struct Node
+class Node
 {
+private:
+	std::set<std::string> edges_source;
+	std::set<std::string> edges_target;
 
-	std::list<Edge*> edges_source_ptrs;
-	std::list<Edge*> edges_target_ptrs;
-
-	std::list<Hyperedge*> hyperedges_ptrs;
-
-	void remove_hyperedge(int id);
+	std::set<std::string> hyperedges;
 
 
+public:
+	std::string name;
 
+	void add_source_edge(const std::string& name);
+	void add_target_edge(const std::string& name);
+	void add_hyperedge(const std::string& name);
+	void remove_hyperedge(const std::string& name);
+
+	void update_names(const std::string& prefix);
+	void update_name_in_connected_elements(Graph* level_graph, std::string new_name);
+
+	void copy_elements_to_node(Node* n);
 
 };
 
 // a unidirectional non-hyper edge
-struct Edge
+class Edge
 {
-	Node* source_node_ptr;
-	Node* target_node_ptr;
+private:
+	EdgeLabel label;
+	std::string source_node;
+	std::string target_node;
+
+	//void replace_target(Node* n);
+	//void replace_source(Node* n);
+
+public:
+	std::string name;
+
+	void update_names(std::string prefix);
+	void update_source_name(std::string name);
+	void update_target_name(std::string name);
 
 };
 
 // hyperedge
-struct Hyperedge
+class Hyperedge
 {
+private:
 	int type;
-	NTLabel label;
-	std::vector<Node*> attachment_nodes_ptrs;
 
-	int id;
+	std::vector<std::string> attachment_nodes;
 
-};
-
-struct GraphMapping
-{
-	std::map<Node*, Node*> node_map;
-	std::map<Edge*, Edge*> edge_map;
-	std::map<Hyperedge*, Hyperedge*> hyperedge_map;
-};
+public:
+	std::string name;
+	HyperedgeLabel label;
 
 
-// hypergraph representing the graph which is being transformed
-struct Graph
-{
-
-	std::vector<Node> nodes;
-	std::vector<Edge> edges;
-
-	std::list<Hyperedge> hyperedges;
-
-	Hyperedge* get_next_hyperedge_to_transform();
-
-	void remove_hyperedge(int id);
+	std::string get_attachment_node(int index);
+	void delete_from_attachment_nodes(Graph* graph);
+	
+	void update_names(std::string prefix);
+	void update_node_name(std::string old_name, std::string new_name);
 
 };
 
-// a graph which is intended to replace a hyperedge
-struct subGraph
+
+// graph!
+class Graph
 {
+private:
 
-	std::vector<Node> nodes;
-	std::vector<Edge> edges;
-	std::vector<Hyperedge> hyperedges;
+	std::map<std::string, Node> nodes;
+	std::map<std::string, Edge> edges;
+	std::map<std::string, Hyperedge> hyperedges;
 
+	std::vector<std::string> external_nodes;
 
-	int type;
-	std::vector<Node*> external_nodes;
+	bool is_external_node(std::string name);
+
+public:
+	bool do_hyperedges_remain();
+
+	Hyperedge* select_hyperedge_to_replace();
+
+	void add_edge(Edge& e);
+	void add_hyperedge(Hyperedge& h);
+	void add_node(Node& n);
+
+	Node* get_node_from_name(std::string name);
+	Edge* get_edge_from_name(std::string name);
+	Hyperedge* get_hyperedge_from_name(std::string name);
 
 	Node* get_external_node(int index);
-	Node* get_node_from_sub_id(int sub_id);
+	void copy_elements_to_level_graph(Graph* level_graph, std::string prefix);
+	void glue_nodes(Graph* level_graph, Hyperedge* hyperedge);
+
+	void remove_hyperedge(std::string name);
 
 };
+
 
 // a production representing a transformation from hyperedge labelled lhs to subgraph rhs
 struct Production
 {
-	NTLabel lhs;
-	subGraph rhs;
+	HyperedgeLabel target_label;
+	Graph replacement_graph;
 	int weight;
 };
 
@@ -99,23 +129,12 @@ struct Production
 // a set of productions which have a common lhs label
 struct ProductionSet
 {
-	NTLabel lhs_label;
+	HyperedgeLabel lhs_label;
 	int num_productions;
 	int weight_total;
 	std::vector<Production> productions;
 
-	Production* select_rule_to_apply();
-
-};
-
-
-struct GraphDisplay
-{
-
-	std::vector<glm::vec3> node_positions;
-	std::vector<glm::vec3> edge_positions;
-	std::vector<glm::vec3> edge_rotations;
-	std::vector<glm::vec3> hyperedge_positions;
+	Graph* select_rule_to_apply();
 
 };
 
@@ -126,21 +145,20 @@ class HyperEdgeGrammar
 
 	std::vector<ProductionSet> rules;
 
+	int replacement_count = 0;
 
-	Graph graph;
+	Graph level_graph;
 
 	HyperEdgeGrammar();
 	~HyperEdgeGrammar();
 
 
-	void GenerateLevel();
+	void generate_graph();
+	void single_replacement(std::string prefix);
+
+	Graph get_output_graph();
 
 
-	void single_transformation();
-
-
-
-	void draw_graph(GraphDisplay& display);
 
 	void output_dot();
 
