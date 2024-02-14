@@ -5,6 +5,7 @@
 #include <map>
 
 
+#include <glm/glm.hpp>
 
 enum class NTLabel {S};
 
@@ -21,6 +22,9 @@ struct Node
 	std::list<Hyperedge*> hyperedges_ptrs;
 
 	void remove_hyperedge(int id);
+
+
+
 
 };
 
@@ -104,6 +108,18 @@ struct ProductionSet
 
 };
 
+
+struct GraphDisplay
+{
+
+	std::vector<glm::vec3> node_positions;
+	std::vector<glm::vec3> edge_positions;
+	std::vector<glm::vec3> edge_rotations;
+	std::vector<glm::vec3> hyperedge_positions;
+
+};
+
+
 // a collection of rules and methods for applying those rules to a given graph
 class HyperEdgeGrammar
 {
@@ -124,6 +140,9 @@ class HyperEdgeGrammar
 
 
 
+	void draw_graph(GraphDisplay& display);
+
+	void output_dot();
 
 };
 

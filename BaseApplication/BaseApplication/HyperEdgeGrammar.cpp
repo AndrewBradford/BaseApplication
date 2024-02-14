@@ -146,3 +146,36 @@ void HyperEdgeGrammar::single_transformation()
 
 }
 
+
+
+
+
+
+void HyperEdgeGrammar::draw_graph(GraphDisplay& display)
+{
+
+
+
+	
+
+
+
+
+
+
+}
+
+void HyperEdgeGrammar::output_dot()
+{
+
+
+
+
+
+
+
+
+
+
+
+}
