@@ -4,11 +4,28 @@
 
 #include <stack>
 
+#include <GLFW/glfw3.h>
+
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+
+
 // ------ NODE FUNCTIONS -------------
 
 void Node::remove_hyperedge(const std::string& name)
 {
 	hyperedges.erase(name);
+}
+
+Node::Node()
+{
+}
+
+Node::~Node()
+{
 }
 
 void Node::add_source_edge(const std::string& name)
@@ -227,17 +244,17 @@ Hyperedge* Graph::select_hyperedge_to_replace()
 
 void Graph::add_edge(Edge& e)
 {
-	edges[e.name] = e;
+	edges[e.get_name()] = e;
 }
 
 void Graph::add_hyperedge(Hyperedge& h)
 {
-	hyperedges[h.name] = h;		
+	hyperedges[h.get_name()] = h;
 }
 
 void Graph::add_node(Node& n)
 {
-	nodes[n.name] = n;
+	nodes[n.get_name()] = n;
 }
 
 Node* Graph::get_node_from_name(std::string name)
@@ -342,6 +359,55 @@ void Graph::remove_hyperedge(std::string name)
 
 }
 
+void Graph::output_dot(GLFWwindow* window)
+{
+	std::string out = "";
+
+	//	digraph {
+	out += "digraph {\n";
+
+	//generate node bits
+
+	for (auto n : nodes)
+	{
+		//	node name -> {
+		out += n.second.get_name();
+		out += " -> { ";
+		//		for each source edge, get name of target node
+		for (std::string es : n.second.get_sources())
+		{
+			//		node name
+			out += get_edge_from_name(es)->get_target();
+			out += " ";
+		}
+		//	}
+		out += "};\n";
+	}
+	//generate hyperedge bits
+
+	for (auto h : hyperedges)
+	{
+		//  hyperedge name [shape = square]
+		out += h.second.get_name() + " [shape = square]\n";
+		//	hyperedge name -> {
+		out += h.second.get_name();
+		out += " -> { ";
+		for (std::string att : h.second.get_attachment_nodes())
+		{
+			//	name of each attachment node
+			out += att;
+			out += " ";
+		}		
+		//	}
+		out += " };\n";
+	}
+	//	}
+	out += "};";
+
+		glfwSetClipboardString(window, out.c_str());
+
+
+}
 
 // ------ PRODUCTION FUNCTIONS -------
 
@@ -375,6 +441,11 @@ Graph* ProductionSet::select_rule_to_apply()
 HyperEdgeGrammar::HyperEdgeGrammar()
 {
 
+	make_starting_graph();
+	make_rules();
+
+
+
 }
 
 HyperEdgeGrammar::~HyperEdgeGrammar()
@@ -383,21 +454,62 @@ HyperEdgeGrammar::~HyperEdgeGrammar()
 
 }
 
-
-
-void HyperEdgeGrammar::generate_graph()
+void HyperEdgeGrammar::make_starting_graph()
 {
 
-	if (level_graph.do_hyperedges_remain())
-	{
-		single_replacement(std::to_string(replacement_count));
-		replacement_count++;
-	}
+	Node ns;
+	ns.set_name("start");
+	
+	Node ne;
+	ne.set_name("end");
+
+	Hyperedge h;
+	h.set_name("h1");
+	h.set_label(HyperedgeLabel::S);
+
+	h.add_attachment_node(ns.get_name());
+	h.add_attachment_node(ne.get_name());
+
+	ns.add_hyperedge(h.get_name());
+	ne.add_hyperedge(h.get_name());
+
+
+	level_graph.add_node(ns);
+	level_graph.add_node(ne);
+	level_graph.add_hyperedge(h);
+
 
 
 }
 
-void HyperEdgeGrammar::single_replacement(std::string prefix)
+void HyperEdgeGrammar::make_rules()
+{
+}
+
+void HyperEdgeGrammar::reset_graph()
+{
+	make_starting_graph();
+}
+
+
+
+void HyperEdgeGrammar::generate_graph(GLFWwindow* window)
+{
+
+	if (ImGui::Button("Single Replacement + Copy Replacement Graph"))
+	{
+
+		if (level_graph.do_hyperedges_remain())
+		{
+			std::string prefix = std::to_string(replacement_count) + "-";
+			single_replacement(window, prefix);
+			replacement_count++;
+		}
+	}
+
+}
+
+void HyperEdgeGrammar::single_replacement(GLFWwindow* window, std::string prefix)
 {
 
 	//select hyperedge to replace
@@ -407,7 +519,7 @@ void HyperEdgeGrammar::single_replacement(std::string prefix)
 	Graph* replacement_graph = nullptr;
 	for (int i = 0; i < rules.size(); i++)
 	{
-		if (rules.data()[i].lhs_label == hyperedge_to_replace->label)
+		if (rules.data()[i].lhs_label == hyperedge_to_replace->get_label())
 		{
 			replacement_graph = rules.data()[i].select_rule_to_apply();
 			break;
@@ -428,8 +540,11 @@ void HyperEdgeGrammar::single_replacement(std::string prefix)
 	replacement_graph->glue_nodes(&level_graph, hyperedge_to_replace);
 
 	// remove replaced hyperedge
-	level_graph.remove_hyperedge(hyperedge_to_replace->name);
+	level_graph.remove_hyperedge(hyperedge_to_replace->get_name());
 
+
+	//copy replacement graph to clipboard
+	replacement_graph->output_dot(window);
 }
 
 
@@ -438,18 +553,8 @@ Graph HyperEdgeGrammar::get_output_graph()
 	return level_graph;
 }
 
-
-void HyperEdgeGrammar::output_dot()
+void HyperEdgeGrammar::copy_current_graph(GLFWwindow* window)
 {
-
-
-
-
-
-
-
-
-
-
-
+	level_graph.output_dot(window);
 }
+

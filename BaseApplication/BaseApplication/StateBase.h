@@ -8,6 +8,8 @@
 
 #include <glm/glm.hpp>
 
+#include "HyperEdgeGrammar.h"
+
 namespace Hollow {
 
 
@@ -63,6 +65,7 @@ namespace Hollow {
 
 		Light light;
 
+		HyperEdgeGrammar grammar;
 
 		//gui variables
 		float frameTime = 0.0f;

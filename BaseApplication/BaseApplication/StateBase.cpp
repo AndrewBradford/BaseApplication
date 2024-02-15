@@ -137,6 +137,22 @@ namespace Hollow {
 
 		gui();
 
+		if (ImGui::CollapsingHeader("Grammar"))
+		{
+			grammar.generate_graph(window);
+
+			if (ImGui::Button("Copy Current Level Graph to Clipboard"))
+			{
+				grammar.copy_current_graph(window);
+			}
+
+			if (ImGui::Button("Reset Graph"))
+			{
+				grammar.reset_graph();
+			}
+
+		}
+
 
 	}
 
@@ -221,6 +237,8 @@ namespace Hollow {
 
 	void StateBase::gui()
 	{
+
+
 		ImGui::Separator();
 		ImGui::Text("HOLD RIGHT MOUSE BUTTON AND MOVE MOUSE TO LOOK AROUND");
 		ImGui::Text("PRESS WASD KEYS TO MOVE AROUND");
@@ -229,13 +247,17 @@ namespace Hollow {
 		//ImGui::Checkbox("debug", &debugBool);
 		ImGui::Checkbox("Wireframe Mode", &wireFrameToggle);
 
+		if (ImGui::CollapsingHeader("Graphics"))
+		{
 
-		float cols[3] = { light.color.r, light.color.g, light.color.b };
-		ImGui::ColorPicker3("Light Color", cols);
-		light.color.r = cols[0];
-		light.color.g = cols[1];
-		light.color.b = cols[2];
+			float cols[3] = { light.color.r, light.color.g, light.color.b };
+			ImGui::ColorPicker3("Light Color", cols);
+			light.color.r = cols[0];
+			light.color.g = cols[1];
+			light.color.b = cols[2];
+		}
 
+		
 
 
 

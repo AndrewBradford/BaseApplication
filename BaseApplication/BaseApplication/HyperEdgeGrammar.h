@@ -15,18 +15,28 @@ class Edge;
 class Hyperedge;
 class Graph;
 
+class GLFWwindow;
+
 // a single node
 class Node
 {
 private:
+	std::string name;
+
 	std::set<std::string> edges_source;
 	std::set<std::string> edges_target;
 
 	std::set<std::string> hyperedges;
 
-
 public:
-	std::string name;
+
+	Node();
+	~Node();
+
+	void set_name(std::string new_name) { name = new_name; };
+
+	std::string get_name() { return name; };
+	std::set<std::string>& get_sources() { return edges_source; };
 
 	void add_source_edge(const std::string& name);
 	void add_target_edge(const std::string& name);
@@ -46,13 +56,23 @@ class Edge
 private:
 	EdgeLabel label;
 	std::string source_node;
+
+	std::string name;
 	std::string target_node;
 
-	//void replace_target(Node* n);
-	//void replace_source(Node* n);
-
 public:
-	std::string name;
+
+	void set_source(std::string n) { source_node = n; };
+	void set_target(std::string n) { target_node = n; };
+
+	void set_name(std::string new_name) { name = new_name; };
+	void set_label(EdgeLabel e_label) { label = e_label; };
+
+	std::string get_name() { return name; };
+	std::string get_target() { return target_node; };
+	std::string get_source() { return source_node; };
+	EdgeLabel get_label() { return label; };
+
 
 	void update_names(std::string prefix);
 	void update_source_name(std::string name);
@@ -64,14 +84,22 @@ public:
 class Hyperedge
 {
 private:
-	int type;
+	//int type;
 
-	std::vector<std::string> attachment_nodes;
-
-public:
 	std::string name;
 	HyperedgeLabel label;
+	std::vector<std::string> attachment_nodes;
 
+
+public:
+
+	void set_name(std::string new_name) { name = new_name; };
+	void set_label(HyperedgeLabel h_label) { label = h_label; };
+	void add_attachment_node(std::string n_name) { attachment_nodes.push_back(n_name); };
+	
+	std::string get_name() { return name; };
+	HyperedgeLabel get_label() { return label; };
+	std::vector<std::string>& get_attachment_nodes() { return attachment_nodes; };
 
 	std::string get_attachment_node(int index);
 	void delete_from_attachment_nodes(Graph* graph);
@@ -114,6 +142,9 @@ public:
 
 	void remove_hyperedge(std::string name);
 
+
+	void output_dot(GLFWwindow* window);
+
 };
 
 
@@ -149,18 +180,23 @@ class HyperEdgeGrammar
 
 	Graph level_graph;
 
+public:
+
 	HyperEdgeGrammar();
 	~HyperEdgeGrammar();
 
+	void make_starting_graph();
+	void make_rules();
 
-	void generate_graph();
-	void single_replacement(std::string prefix);
+	void reset_graph();
+
+	void generate_graph(GLFWwindow* window);
+	void single_replacement(GLFWwindow* window, std::string prefix);
 
 	Graph get_output_graph();
 
+	void copy_current_graph(GLFWwindow* window);
 
-
-	void output_dot();
 
 };
 
