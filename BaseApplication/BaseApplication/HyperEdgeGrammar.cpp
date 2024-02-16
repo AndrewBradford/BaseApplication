@@ -169,6 +169,11 @@ void Edge::update_target_name(std::string name)
 	target_node = name;
 }
 
+std::string Edge::text_from_label(EdgeLabel in_label)
+{
+	return std::string();
+}
+
 
 // ------ HYPEREDGE FUNCTIONS --------
 
@@ -227,6 +232,11 @@ void Hyperedge::update_node_name(std::string old_name, std::string new_name)
 
 }
 
+std::string Hyperedge::text_from_label(HyperedgeLabel in_label)
+{
+	return std::string();
+}
+
 
 // ------ GRAPH FUNCTIONS ------------
 
@@ -255,6 +265,22 @@ void Graph::add_hyperedge(Hyperedge& h)
 void Graph::add_node(Node& n)
 {
 	nodes[n.get_name()] = n;
+}
+
+void Graph::add_nodes(int num, Node* in_nodes)
+{
+	for (int i = 0; i < num; i++)
+	{
+		add_node(in_nodes[i]);
+	}
+}
+
+void Graph::add_edges(int num, Edge* in_edges)
+{
+	for (int i = 0; i < num; i++)
+	{
+		add_edge(in_edges[i]);
+	}
 }
 
 Node* Graph::get_node_from_name(std::string name)
@@ -370,27 +396,30 @@ void Graph::output_dot(GLFWwindow* window)
 
 	for (auto n : nodes)
 	{
-		//	node name -> {
-		out += n.second.get_name();
-		out += " -> { ";
 		//		for each source edge, get name of target node
 		for (std::string es : n.second.get_sources())
 		{
+			//	node name -> {
+			out += n.second.get_name();
+			out += " -> ";
+
 			//		node name
 			out += get_edge_from_name(es)->get_target();
+			out += " [label = " + Edge::text_from_label(get_edge_from_name(es)->get_label()) + "]";
+
 			out += " ";
+			out += ";\n";
 		}
 		//	}
-		out += "};\n";
 	}
 	//generate hyperedge bits
 
 	for (auto h : hyperedges)
 	{
 		//  hyperedge name [shape = square]
-		out += h.second.get_name() + " [shape = square]\n";
+		out += h.second.get_name() + ":" + Hyperedge::text_from_label(h.second.get_label()) + " [shape = square]\n";
 		//	hyperedge name -> {
-		out += h.second.get_name();
+		out += h.second.get_name() + ":" + Hyperedge::text_from_label(h.second.get_label());
 		out += " -> { ";
 		for (std::string att : h.second.get_attachment_nodes())
 		{
@@ -434,6 +463,17 @@ Graph* ProductionSet::select_rule_to_apply()
 
 }
 
+void ProductionSet::update_weight()
+{
+	int total = 0;
+	for (int i = 0; i < productions.size(); i++)
+	{
+		total += productions.data()[i].weight;
+	}
+	weight_total = total;
+	num_productions = productions.size();
+}
+
 
 // ------ GRAMMAR FUNCTIONS ----------
 
@@ -465,7 +505,7 @@ void HyperEdgeGrammar::make_starting_graph()
 
 	Hyperedge h;
 	h.set_name("h1");
-	h.set_label(HyperedgeLabel::S);
+	h.set_label(HyperedgeLabel::MOVE);
 
 	h.add_attachment_node(ns.get_name());
 	h.add_attachment_node(ne.get_name());
@@ -484,6 +524,454 @@ void HyperEdgeGrammar::make_starting_graph()
 
 void HyperEdgeGrammar::make_rules()
 {
+
+
+	// MOVE Rules
+	ProductionSet MoveRules;
+	MoveRules.lhs_label = HyperedgeLabel::MOVE;
+	{
+		Production move_1(HyperedgeLabel::MOVE, 1);
+
+		Node ns[2];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+
+		Edge e(EdgeLabel::jump, "e0", "n0", "n1");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		move_1.replacement_graph.add_nodes(2, ns);
+		move_1.replacement_graph.add_edge(e);
+
+		move_1.replacement_graph.add_external_node("n0");
+		move_1.replacement_graph.add_external_node("n1");
+
+		MoveRules.AddRule(move_1);
+
+	}
+	{
+
+		Production move_2(HyperedgeLabel::MOVE, 1);
+		
+		Node ns[3];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+		ns[2].set_name("n2");
+
+		Edge e(EdgeLabel::jump, "e0", "n0", "n1");
+
+		Hyperedge h("h0", HyperedgeLabel::IN_AIR);
+		h.add_attachment_node("n1"); 
+		h.add_attachment_node("n2");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		ns[1].add_hyperedge("h0");
+		ns[2].add_hyperedge("h1");
+
+		move_2.replacement_graph.add_nodes(3, ns);
+		move_2.replacement_graph.add_edge(e);
+		move_2.replacement_graph.add_hyperedge(h);
+
+		move_2.replacement_graph.add_external_node("n0");
+		move_2.replacement_graph.add_external_node("n2");
+
+		MoveRules.AddRule(move_2);
+
+
+	}
+	{
+		Production move_3(HyperedgeLabel::MOVE, 1);
+
+		Node ns[2];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+
+		Edge e(EdgeLabel::long_jump, "e0", "n0", "n1");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		move_3.replacement_graph.add_nodes(2, ns);
+		move_3.replacement_graph.add_edge(e);
+
+		move_3.replacement_graph.add_external_node("n0");
+		move_3.replacement_graph.add_external_node("n1");
+
+		MoveRules.AddRule(move_3);
+
+	}
+	{
+		Production move_4(HyperedgeLabel::MOVE, 1);
+
+
+		Node ns[3];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+		ns[2].set_name("n2");
+
+		Edge e(EdgeLabel::long_jump, "e0", "n0", "n1");
+
+		Hyperedge h("h0", HyperedgeLabel::IN_AIR);
+		h.add_attachment_node("n1");
+		h.add_attachment_node("n2");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		ns[1].add_hyperedge("h0");
+		ns[2].add_hyperedge("h1");
+
+		move_4.replacement_graph.add_nodes(3, ns);
+		move_4.replacement_graph.add_edge(e);
+		move_4.replacement_graph.add_hyperedge(h);
+
+		move_4.replacement_graph.add_external_node("n0");
+		move_4.replacement_graph.add_external_node("n2");
+
+		MoveRules.AddRule(move_4);
+	}
+	MoveRules.update_weight();
+	rules.push_back(MoveRules);
+
+	// IN AIR Rules
+	ProductionSet AirRules;
+	AirRules.lhs_label = HyperedgeLabel::IN_AIR;
+	{
+		Production air_1(HyperedgeLabel::IN_AIR, 1);
+
+		Node ns[2];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+
+		Edge e(EdgeLabel::kick, "e0", "n0", "n1");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		air_1.replacement_graph.add_nodes(2, ns);
+		air_1.replacement_graph.add_edge(e);
+
+		air_1.replacement_graph.add_external_node("n0");
+		air_1.replacement_graph.add_external_node("n1");
+
+		AirRules.AddRule(air_1);
+
+	}
+	{
+
+		Production air_2(HyperedgeLabel::IN_AIR, 1);
+
+		Node ns[3];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+		ns[2].set_name("n2");
+
+		Edge e(EdgeLabel::kick, "e0", "n0", "n1");
+
+		Hyperedge h("h0", HyperedgeLabel::KICKING);
+		h.add_attachment_node("n1");
+		h.add_attachment_node("n2");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		ns[1].add_hyperedge("h0");
+		ns[2].add_hyperedge("h1");
+
+		air_2.replacement_graph.add_nodes(3, ns);
+		air_2.replacement_graph.add_edge(e);
+		air_2.replacement_graph.add_hyperedge(h);
+
+		air_2.replacement_graph.add_external_node("n0");
+		air_2.replacement_graph.add_external_node("n2");
+
+		AirRules.AddRule(air_2);
+
+
+	}
+	{
+		Production air_3(HyperedgeLabel::IN_AIR, 1);
+
+		Node ns[2];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+
+		Edge e(EdgeLabel::dive, "e0", "n0", "n1");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		air_3.replacement_graph.add_nodes(2, ns);
+		air_3.replacement_graph.add_edge(e);
+
+		air_3.replacement_graph.add_external_node("n0");
+		air_3.replacement_graph.add_external_node("n1");
+
+		AirRules.AddRule(air_3);
+
+	}
+	{
+
+		Production air_4(HyperedgeLabel::IN_AIR, 1);
+
+		Node ns[3];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+		ns[2].set_name("n2");
+
+		Edge e(EdgeLabel::dive, "e0", "n0", "n1");
+
+		Hyperedge h("h0", HyperedgeLabel::DIVING);
+		h.add_attachment_node("n1");
+		h.add_attachment_node("n2");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		ns[1].add_hyperedge("h0");
+		ns[2].add_hyperedge("h1");
+
+		air_4.replacement_graph.add_nodes(3, ns);
+		air_4.replacement_graph.add_edge(e);
+		air_4.replacement_graph.add_hyperedge(h);
+
+		air_4.replacement_graph.add_external_node("n0");
+		air_4.replacement_graph.add_external_node("n2");
+
+		AirRules.AddRule(air_4);
+
+	}
+	AirRules.update_weight();
+	rules.push_back(AirRules);
+
+	// KICKING Rules
+	ProductionSet KickingRules;
+	KickingRules.lhs_label = HyperedgeLabel::KICKING;
+	{
+		Production kick_1(HyperedgeLabel::KICKING, 1);
+
+		Node ns[2];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+
+		Edge e(EdgeLabel::dive, "e0", "n0", "n1");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		kick_1.replacement_graph.add_nodes(2, ns);
+		kick_1.replacement_graph.add_edge(e);
+
+		kick_1.replacement_graph.add_external_node("n0");
+		kick_1.replacement_graph.add_external_node("n1");
+
+		KickingRules.AddRule(kick_1);
+
+	}
+	{
+
+		Production kick_2(HyperedgeLabel::KICKING, 1);
+
+		Node ns[3];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+		ns[2].set_name("n2");
+
+		Edge e(EdgeLabel::dive, "e0", "n0", "n1");
+
+		Hyperedge h("h0", HyperedgeLabel::DIVING);
+		h.add_attachment_node("n1");
+		h.add_attachment_node("n2");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		ns[1].add_hyperedge("h0");
+		ns[2].add_hyperedge("h1");
+
+		kick_2.replacement_graph.add_nodes(3, ns);
+		kick_2.replacement_graph.add_edge(e);
+		kick_2.replacement_graph.add_hyperedge(h);
+
+		kick_2.replacement_graph.add_external_node("n0");
+		kick_2.replacement_graph.add_external_node("n2");
+
+		KickingRules.AddRule(kick_2);
+
+
+	}
+	{
+		Production kick_3(HyperedgeLabel::KICKING, 1);
+
+		Node ns[2];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+
+		Edge e(EdgeLabel::deflect, "e0", "n0", "n1");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		kick_3.replacement_graph.add_nodes(2, ns);
+		kick_3.replacement_graph.add_edge(e);
+
+		kick_3.replacement_graph.add_external_node("n0");
+		kick_3.replacement_graph.add_external_node("n1");
+
+		KickingRules.AddRule(kick_3);
+
+	}
+	{
+
+		Production kick_4(HyperedgeLabel::KICKING, 1);
+
+		Node ns[3];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+		ns[2].set_name("n2");
+
+		Edge e(EdgeLabel::deflect, "e0", "n0", "n1");
+
+		Hyperedge h("h0", HyperedgeLabel::IN_AIR);
+		h.add_attachment_node("n1");
+		h.add_attachment_node("n2");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		ns[1].add_hyperedge("h0");
+		ns[2].add_hyperedge("h1");
+
+		kick_4.replacement_graph.add_nodes(3, ns);
+		kick_4.replacement_graph.add_edge(e);
+		kick_4.replacement_graph.add_hyperedge(h);
+
+		kick_4.replacement_graph.add_external_node("n0");
+		kick_4.replacement_graph.add_external_node("n2");
+
+		KickingRules.AddRule(kick_4);
+
+	}
+	KickingRules.update_weight();
+	rules.push_back(KickingRules);
+
+	// DIVING Rules
+
+	ProductionSet DivingRules;
+	DivingRules.lhs_label = HyperedgeLabel::DIVING;
+	{
+		Production dive_1(HyperedgeLabel::DIVING, 1);
+
+		Node ns[2];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+
+		Edge e(EdgeLabel::backflip, "e0", "n0", "n1");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		dive_1.replacement_graph.add_nodes(2, ns);
+		dive_1.replacement_graph.add_edge(e);
+
+		dive_1.replacement_graph.add_external_node("n0");
+		dive_1.replacement_graph.add_external_node("n1");
+
+		DivingRules.AddRule(dive_1);
+
+	}
+	{
+
+		Production dive_2(HyperedgeLabel::DIVING, 1);
+
+		Node ns[3];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+		ns[2].set_name("n2");
+
+		Edge e(EdgeLabel::backflip, "e0", "n0", "n1");
+
+		Hyperedge h("h0", HyperedgeLabel::IN_AIR);
+		h.add_attachment_node("n1");
+		h.add_attachment_node("n2");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		ns[1].add_hyperedge("h0");
+		ns[2].add_hyperedge("h1");
+
+		dive_2.replacement_graph.add_nodes(3, ns);
+		dive_2.replacement_graph.add_edge(e);
+		dive_2.replacement_graph.add_hyperedge(h);
+
+		dive_2.replacement_graph.add_external_node("n0");
+		dive_2.replacement_graph.add_external_node("n2");
+
+		DivingRules.AddRule(dive_2);
+
+
+	}
+	{
+		Production dive_3(HyperedgeLabel::DIVING, 1);
+
+		Node ns[2];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+
+		Edge e(EdgeLabel::dive_spring, "e0", "n0", "n1");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		dive_3.replacement_graph.add_nodes(2, ns);
+		dive_3.replacement_graph.add_edge(e);
+
+		dive_3.replacement_graph.add_external_node("n0");
+		dive_3.replacement_graph.add_external_node("n1");
+
+		DivingRules.AddRule(dive_3);
+
+	}
+	{
+
+		Production dive_4(HyperedgeLabel::DIVING, 1);
+
+		Node ns[3];
+		ns[0].set_name("n0");
+		ns[1].set_name("n1");
+		ns[2].set_name("n2");
+
+		Edge e(EdgeLabel::dive_spring, "e0", "n0", "n1");
+
+		Hyperedge h("h0", HyperedgeLabel::IN_AIR);
+		h.add_attachment_node("n1");
+		h.add_attachment_node("n2");
+
+		ns[0].add_source_edge("e0");
+		ns[1].add_target_edge("e0");
+
+		ns[1].add_hyperedge("h0");
+		ns[2].add_hyperedge("h1");
+
+		dive_4.replacement_graph.add_nodes(3, ns);
+		dive_4.replacement_graph.add_edge(e);
+		dive_4.replacement_graph.add_hyperedge(h);
+
+		dive_4.replacement_graph.add_external_node("n0");
+		dive_4.replacement_graph.add_external_node("n2");
+
+		DivingRules.AddRule(dive_4);
+
+	}
+	DivingRules.update_weight();
+	rules.push_back(DivingRules);
+
+
+
 }
 
 void HyperEdgeGrammar::reset_graph()

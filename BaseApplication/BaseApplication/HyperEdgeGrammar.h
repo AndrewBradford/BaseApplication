@@ -8,8 +8,9 @@
 
 #include <glm/glm.hpp>
 
-enum class HyperedgeLabel { S };
-enum class EdgeLabel { a };
+enum class HyperedgeLabel { MOVE, IN_AIR, KICKING, DIVING };
+enum class EdgeLabel { jump, long_jump, backflip, dive, dive_spring, kick, deflect,};
+enum class NodeLabel { platform, intermediate };
 
 class Edge;
 class Hyperedge;
@@ -54,13 +55,22 @@ public:
 class Edge
 {
 private:
-	EdgeLabel label;
+	EdgeLabel label = EdgeLabel::jump;
 	std::string source_node;
 
 	std::string name;
 	std::string target_node;
 
 public:
+
+	Edge() {};
+	Edge(EdgeLabel l, std::string nm, std::string src, std::string tar)
+	{
+		label = l;
+		name = nm;
+		source_node = src;
+		target_node = tar;
+	};
 
 	void set_source(std::string n) { source_node = n; };
 	void set_target(std::string n) { target_node = n; };
@@ -78,6 +88,8 @@ public:
 	void update_source_name(std::string name);
 	void update_target_name(std::string name);
 
+	static std::string text_from_label(EdgeLabel in_label);
+
 };
 
 // hyperedge
@@ -87,11 +99,18 @@ private:
 	//int type;
 
 	std::string name;
-	HyperedgeLabel label;
+	HyperedgeLabel label = HyperedgeLabel::MOVE;
 	std::vector<std::string> attachment_nodes;
 
 
 public:
+
+	Hyperedge() {};
+	Hyperedge(std::string nm, HyperedgeLabel l)
+	{
+		name = nm;
+		label = l;
+	}
 
 	void set_name(std::string new_name) { name = new_name; };
 	void set_label(HyperedgeLabel h_label) { label = h_label; };
@@ -106,6 +125,8 @@ public:
 	
 	void update_names(std::string prefix);
 	void update_node_name(std::string old_name, std::string new_name);
+
+	static std::string text_from_label(HyperedgeLabel in_label);
 
 };
 
@@ -132,6 +153,14 @@ public:
 	void add_hyperedge(Hyperedge& h);
 	void add_node(Node& n);
 
+	void add_nodes(int num, Node* in_nodes);
+	void add_edges(int num, Edge* in_edges);
+
+	void add_external_node(std::string nm)
+	{
+		external_nodes.push_back(nm);
+	};
+
 	Node* get_node_from_name(std::string name);
 	Edge* get_edge_from_name(std::string name);
 	Hyperedge* get_hyperedge_from_name(std::string name);
@@ -151,6 +180,12 @@ public:
 // a production representing a transformation from hyperedge labelled lhs to subgraph rhs
 struct Production
 {
+	Production(HyperedgeLabel l, int w)
+	{
+		target_label = l;
+		weight = w;
+	}
+
 	HyperedgeLabel target_label;
 	Graph replacement_graph;
 	int weight;
@@ -166,6 +201,9 @@ struct ProductionSet
 	std::vector<Production> productions;
 
 	Graph* select_rule_to_apply();
+
+	void AddRule(Production p) { productions.push_back(p); };
+	void update_weight();
 
 };
 
