@@ -16,7 +16,7 @@ class Edge;
 class Hyperedge;
 class Graph;
 
-class GLFWwindow;
+struct GLFWwindow;
 
 // a single node
 class Node
@@ -200,7 +200,7 @@ struct ProductionSet
 	int weight_total;
 	std::vector<Production> productions;
 
-	Graph* select_rule_to_apply();
+	Production* select_rule_to_apply();
 
 	void AddRule(Production p) { productions.push_back(p); };
 	void update_weight();

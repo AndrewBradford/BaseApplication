@@ -171,7 +171,34 @@ void Edge::update_target_name(std::string name)
 
 std::string Edge::text_from_label(EdgeLabel in_label)
 {
-	return std::string();
+	std::string out;
+	switch (in_label)
+	{
+
+	case EdgeLabel::jump:
+		out = "jump";
+		break;
+	case EdgeLabel::long_jump:
+		out = "long_jump";
+		break;
+	case EdgeLabel::backflip:
+		out = "backflip";
+		break;
+	case EdgeLabel::dive:
+		out = "dive";
+		break;
+	case EdgeLabel::dive_spring:
+		out = "dive_spring";
+		break;
+	case EdgeLabel::kick:
+		out = "kick";
+		break;
+	case EdgeLabel::deflect:
+		out = "deflect";
+		break;
+	}
+	return out;
+
 }
 
 
@@ -234,6 +261,25 @@ void Hyperedge::update_node_name(std::string old_name, std::string new_name)
 
 std::string Hyperedge::text_from_label(HyperedgeLabel in_label)
 {
+	std::string out;
+	switch (in_label)
+	{
+	case HyperedgeLabel::MOVE:
+		out = "MOVE";
+		break;
+	case HyperedgeLabel::IN_AIR:
+		out = "IN_AIR";
+		break;
+	case HyperedgeLabel::KICKING:
+		out = "KICKING";
+		break;
+	case HyperedgeLabel::DIVING:
+		out = "DIVING";
+		break;			
+	}
+	return out;
+
+
 	return std::string();
 }
 
@@ -325,7 +371,7 @@ void Graph::copy_elements_to_level_graph(Graph* level_graph, std::string prefix)
 	//	and add to level graph
 
 	//	nodes
-	for (auto n : nodes)
+	for (auto& n : nodes)
 	{
 		if (is_external_node(n.first)) 
 		{ 
@@ -338,14 +384,14 @@ void Graph::copy_elements_to_level_graph(Graph* level_graph, std::string prefix)
 	}
 
 	//	edges
-	for (auto e : edges)
+	for (auto& e : edges)
 	{
 		e.second.update_names(prefix);
 		level_graph->add_edge(e.second);
 	}
 
 	//	hyperedges
-	for (auto h : hyperedges)
+	for (auto& h : hyperedges)
 	{
 		h.second.update_names(prefix);
 		level_graph->add_hyperedge(h.second);
@@ -417,9 +463,9 @@ void Graph::output_dot(GLFWwindow* window)
 	for (auto h : hyperedges)
 	{
 		//  hyperedge name [shape = square]
-		out += h.second.get_name() + ":" + Hyperedge::text_from_label(h.second.get_label()) + " [shape = square]\n";
+		out += h.second.get_name() + Hyperedge::text_from_label(h.second.get_label()) + " [shape = square]\n";
 		//	hyperedge name -> {
-		out += h.second.get_name() + ":" + Hyperedge::text_from_label(h.second.get_label());
+		out += h.second.get_name() + Hyperedge::text_from_label(h.second.get_label());
 		out += " -> { ";
 		for (std::string att : h.second.get_attachment_nodes())
 		{
@@ -440,7 +486,7 @@ void Graph::output_dot(GLFWwindow* window)
 
 // ------ PRODUCTION FUNCTIONS -------
 
-Graph* ProductionSet::select_rule_to_apply()
+Production* ProductionSet::select_rule_to_apply()
 {
 
 	//generate random number between 0 and total weight of rules
@@ -454,11 +500,11 @@ Graph* ProductionSet::select_rule_to_apply()
 		weight_count += productions.data()[i].weight;
 		if (weight_count >= num)
 		{
-			return &productions.data()[i].replacement_graph;
+			return &productions.data()[i];
 		}
 
 	}
-	return &productions.data()[0].replacement_graph;
+	return &productions.data()[0];
 
 
 }
@@ -569,7 +615,7 @@ void HyperEdgeGrammar::make_rules()
 		ns[1].add_target_edge("e0");
 
 		ns[1].add_hyperedge("h0");
-		ns[2].add_hyperedge("h1");
+		ns[2].add_hyperedge("h0");
 
 		move_2.replacement_graph.add_nodes(3, ns);
 		move_2.replacement_graph.add_edge(e);
@@ -622,7 +668,7 @@ void HyperEdgeGrammar::make_rules()
 		ns[1].add_target_edge("e0");
 
 		ns[1].add_hyperedge("h0");
-		ns[2].add_hyperedge("h1");
+		ns[2].add_hyperedge("h0");
 
 		move_4.replacement_graph.add_nodes(3, ns);
 		move_4.replacement_graph.add_edge(e);
@@ -679,7 +725,7 @@ void HyperEdgeGrammar::make_rules()
 		ns[1].add_target_edge("e0");
 
 		ns[1].add_hyperedge("h0");
-		ns[2].add_hyperedge("h1");
+		ns[2].add_hyperedge("h0");
 
 		air_2.replacement_graph.add_nodes(3, ns);
 		air_2.replacement_graph.add_edge(e);
@@ -732,7 +778,7 @@ void HyperEdgeGrammar::make_rules()
 		ns[1].add_target_edge("e0");
 
 		ns[1].add_hyperedge("h0");
-		ns[2].add_hyperedge("h1");
+		ns[2].add_hyperedge("h0");
 
 		air_4.replacement_graph.add_nodes(3, ns);
 		air_4.replacement_graph.add_edge(e);
@@ -790,7 +836,7 @@ void HyperEdgeGrammar::make_rules()
 		ns[1].add_target_edge("e0");
 
 		ns[1].add_hyperedge("h0");
-		ns[2].add_hyperedge("h1");
+		ns[2].add_hyperedge("h0");
 
 		kick_2.replacement_graph.add_nodes(3, ns);
 		kick_2.replacement_graph.add_edge(e);
@@ -843,7 +889,7 @@ void HyperEdgeGrammar::make_rules()
 		ns[1].add_target_edge("e0");
 
 		ns[1].add_hyperedge("h0");
-		ns[2].add_hyperedge("h1");
+		ns[2].add_hyperedge("h0");
 
 		kick_4.replacement_graph.add_nodes(3, ns);
 		kick_4.replacement_graph.add_edge(e);
@@ -902,7 +948,7 @@ void HyperEdgeGrammar::make_rules()
 		ns[1].add_target_edge("e0");
 
 		ns[1].add_hyperedge("h0");
-		ns[2].add_hyperedge("h1");
+		ns[2].add_hyperedge("h0");
 
 		dive_2.replacement_graph.add_nodes(3, ns);
 		dive_2.replacement_graph.add_edge(e);
@@ -955,7 +1001,7 @@ void HyperEdgeGrammar::make_rules()
 		ns[1].add_target_edge("e0");
 
 		ns[1].add_hyperedge("h0");
-		ns[2].add_hyperedge("h1");
+		ns[2].add_hyperedge("h0");
 
 		dive_4.replacement_graph.add_nodes(3, ns);
 		dive_4.replacement_graph.add_edge(e);
@@ -987,9 +1033,13 @@ void HyperEdgeGrammar::generate_graph(GLFWwindow* window)
 	if (ImGui::Button("Single Replacement + Copy Replacement Graph"))
 	{
 
+
 		if (level_graph.do_hyperedges_remain())
 		{
-			std::string prefix = std::to_string(replacement_count) + "-";
+			char pre = 'a' + replacement_count;
+			std::string pr; 
+			pr.push_back(pre);
+			std::string prefix = pr + "_";
 			single_replacement(window, prefix);
 			replacement_count++;
 		}
@@ -1004,35 +1054,35 @@ void HyperEdgeGrammar::single_replacement(GLFWwindow* window, std::string prefix
 	Hyperedge* hyperedge_to_replace = level_graph.select_hyperedge_to_replace();
 
 	//select rule to apply
-	Graph* replacement_graph = nullptr;
+	Graph replacement_graph;
+	Production* rule_applied = nullptr;
 	for (int i = 0; i < rules.size(); i++)
 	{
 		if (rules.data()[i].lhs_label == hyperedge_to_replace->get_label())
 		{
-			replacement_graph = rules.data()[i].select_rule_to_apply();
+			rule_applied = rules.data()[i].select_rule_to_apply();
+			replacement_graph = rule_applied->replacement_graph;
+
 			break;
 		}
-	}
-	if (replacement_graph == nullptr)
-	{
-		return;
 	}
 
 	//remove hyperedge from attachment nodes
 	hyperedge_to_replace->delete_from_attachment_nodes(&level_graph);
 
 	// copy replacement graph elements to level graph
-	replacement_graph->copy_elements_to_level_graph(&level_graph, prefix);
+	replacement_graph.copy_elements_to_level_graph(&level_graph, prefix);
 
 	// glue external nodes to attachment nodes
-	replacement_graph->glue_nodes(&level_graph, hyperedge_to_replace);
+	replacement_graph.glue_nodes(&level_graph, hyperedge_to_replace);
 
 	// remove replaced hyperedge
 	level_graph.remove_hyperedge(hyperedge_to_replace->get_name());
 
 
 	//copy replacement graph to clipboard
-	replacement_graph->output_dot(window);
+	//replacement_graph.output_dot(window);
+	rule_applied->replacement_graph.output_dot(window);
 }
 
 
