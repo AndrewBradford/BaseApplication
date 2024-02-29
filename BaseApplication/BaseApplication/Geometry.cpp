@@ -218,6 +218,14 @@ namespace Hollow {
 
 	}
 
+	void Geometry::DrawVArrayLine(VArray VAO)
+	{
+
+		glBindVertexArray(VAO.ID);
+		glDrawArrays(GL_LINES, 0, 2);
+
+
+	}
 
 }
 

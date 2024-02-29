@@ -131,6 +131,27 @@ namespace Hollow {
 
 	}
 
+	void LineShader::UseShader(glm::vec3& start, glm::vec3& end, glm::mat4& model, glm::mat4& view, glm::mat4& proj, glm::vec3 objectCol)
+	{
+		
+		glUseProgram(ID);
+
+		//set uniforms
+
+		//vertex shader
+		setMatrix4f("model", model);
+		setMatrix4f("view", view);
+		setMatrix4f("projection", proj);
+
+		setVec3("startPos", start);
+		setVec3("endPos", end);
+
+		//fragment shader
+		setVec3("objectColor", objectCol);
+	
+	
+	}
+
 	void TexShader::UseShader(glm::mat4& model, glm::mat4& view, glm::mat4& proj
 		, unsigned int texID, unsigned int texUnit)
 	{
@@ -151,5 +172,6 @@ namespace Hollow {
 
 
 	}
+
 
 }

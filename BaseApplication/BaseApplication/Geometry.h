@@ -67,6 +67,8 @@ namespace Hollow {
 		static VArray SetupVAO(Hollow::Shape* shape, VBuffer VBO);
 		static void DrawVArray(VArray VAO);
 
+		static void DrawVArrayLine(VArray VAO);
+
 	private:
 
 

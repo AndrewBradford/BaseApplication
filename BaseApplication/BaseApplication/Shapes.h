@@ -108,5 +108,38 @@ namespace Hollow {
 	};
 
 
+	class Line : public Shape
+	{
+
+	public:
+
+		Line() : Shape{ 2,3,0,3,0,0,0 }
+		{
+		};
+		~Line() {};
+
+		float vertices[2 * 3] = {
+			0.f, 0.f, 0.f,
+			1.f, 1.f, 1.f
+		};
+
+
+		size_t getVertexSize() override {
+			return sizeof(vertices);
+		}
+		float* getVertexRef() override {
+			return vertices;
+		}
+
+		size_t getIndexSize() override {
+			return 0;
+		}
+		float* getIndexRef() override {
+			return nullptr;
+		}
+
+	};
+
+
 
 }

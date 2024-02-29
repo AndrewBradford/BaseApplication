@@ -43,6 +43,13 @@ namespace Hollow {
 		delete shapeptr;
 		shapeptr = nullptr;
 
+		Shape* lineptr = new Line();
+		line = Geometry::SetupVAO(lineptr);
+		delete lineptr;
+		lineptr = nullptr;
+
+
+
 
 		cube.color = glm::vec3(1.0f, 0.5f, 0.31f);
 		cube.position = glm::vec3(-3.0f, 3.0f, 0.0f);
@@ -57,7 +64,13 @@ namespace Hollow {
 		lightCube.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		lightCube.scale = glm::vec3(0.2f);
 
+		lineOb.color = glm::vec3(1.0f, 1.0f, 1.0f);
+		lineOb.position = glm::vec3(1.f, 1.f, 1.f);
+		lineOb.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+		lineOb.scale = glm::vec3(1.0f);
 
+		line_start = glm::vec3(0.0f, 0.0f, 0.0f);
+		line_end = glm::vec3(1.f, 1.f, 1.f);
 
 	}
 
@@ -130,6 +143,14 @@ namespace Hollow {
 			shaders.litShader.UseShader(model, view, projection, cube.color, light.color, light.position, camera.Position);
 			Geometry::DrawVArray(cubeVN);
 		}
+
+		// draw line
+		model = glm::mat4(1.0f);
+		shaders.lineShader.UseShader(line_start, line_end, model, view, projection, lineOb.color);
+		Geometry::DrawVArrayLine(line);
+
+
+
 
 		glBindVertexArray(0);
 
@@ -257,7 +278,26 @@ namespace Hollow {
 			light.color.b = cols[2];
 		}
 
-		
+		if (ImGui::CollapsingHeader("Physics"))
+		{
+
+			//line 
+			float line_s[3] = { line_start.x, line_start.y, line_start.z };
+			ImGui::SliderFloat3("line start", line_s, -10, 10);
+			line_start.x = line_s[0];
+			line_start.y = line_s[1];
+			line_start.z = line_s[2];
+
+			float line_e[3] = { line_end.x, line_end.y, line_end.z };
+			ImGui::SliderFloat3("line end", line_e, -10, 10);
+			line_end.x = line_e[0];
+			line_end.y = line_e[1];
+			line_end.z = line_e[2];
+
+
+
+
+		}
 
 
 

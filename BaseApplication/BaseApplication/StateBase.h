@@ -21,6 +21,7 @@ namespace Hollow {
 		struct Shaders {
 			LitShader litShader;
 			FlatShader flatShader;
+			LineShader lineShader;
 		};
 
 		struct GObject {
@@ -59,9 +60,12 @@ namespace Hollow {
 
 		VArray cubeVN;
 		VArray cubeV;
+		VArray line;
 
 		GObject cube;
 		GObject lightCube;
+
+		GObject lineOb;
 
 		Light light;
 
@@ -72,7 +76,8 @@ namespace Hollow {
 		bool debugBool = false;
 		bool wireFrameToggle = false;
 
-
+		glm::vec3 line_start;
+		glm::vec3 line_end;
 
 
 
