@@ -13,6 +13,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include "Physics.h"
+
 
 namespace Hollow {
 
@@ -79,6 +81,13 @@ namespace Hollow {
 		velocity = 10.f;
 		angle = 3.14f / 4.f;
 
+		point_pos = glm::vec3(5.f, 5.f, 0.f);
+
+		yes_col = glm::vec3(0.f, 0.7f, 0.3f);
+		no_col = glm::vec3(0.86f, 0.1f, 0.13f);
+
+		point_col = glm::vec3(1.f, 1.f, 1.f);
+
 	}
 
 	void StateBase::frame(float dt, GLFWwindow* window, Input* in)
@@ -103,7 +112,7 @@ namespace Hollow {
 		else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 
 		//projection and view matrices
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1440.0f / 960.0f, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1440.0f / 960.0f, 0.1f, 300.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 model = glm::mat4(1.0f);
 
@@ -114,21 +123,21 @@ namespace Hollow {
 		model = glm::translate(model, cube.position);
 		model = glm::scale(model, cube.scale);
 
-		shaders.litShader.UseShader(model, view, projection, cube.color, light.color, light.position, camera.Position);
-		Geometry::DrawVArray(cubeVN);
+		//shaders.litShader.UseShader(model, view, projection, cube.color, light.color, light.position, camera.Position);
+		//Geometry::DrawVArray(cubeVN);
 
 
 		// light object
-
+		/*
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, lightCube.position);
 		model = glm::scale(model, lightCube.scale);
 
 		shaders.flatShader.UseShader(model, view, projection, light.color);
-		Geometry::DrawVArray(cubeV);
+		Geometry::DrawVArray(cubeV);*/
 
 
-
+		/*
 		glm::vec3 cubePositions[] = {
 			glm::vec3(3.0f,  3.0f,  3.0f),
 			glm::vec3(2.0f,  5.0f, -15.0f),
@@ -149,17 +158,62 @@ namespace Hollow {
 
 			shaders.litShader.UseShader(model, view, projection, cube.color, light.color, light.position, camera.Position);
 			Geometry::DrawVArray(cubeVN);
-		}
+		}*/
 
 		// draw line
-		model = glm::mat4(1.0f);
-		shaders.lineShader.UseShader(line_start, line_end, model, view, projection, lineOb.color);
-		Geometry::DrawVArrayLine(line);
+		//model = glm::mat4(1.0f);
+		//shaders.lineShader.UseShader(line_start, line_end, model, view, projection, lineOb.color);
+		//Geometry::DrawVArrayLine(line);
 
 		//draw trajectory
 		model = glm::mat4(1.0f);
 		shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, lineOb.color);
 		Geometry::DrawVArrayLineStrip(trajectory);
+
+
+
+		if (Physics::trajectory_test(velocity, gravity, angle, point_pos))
+		{
+			point_col = yes_col;
+		}
+		else
+		{
+			point_col = no_col;
+		}
+
+
+		//draw point
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, point_pos);
+		model = glm::scale(model, lightCube.scale);
+
+		shaders.flatShader.UseShader(model, view, projection, point_col);
+		Geometry::DrawVArray(cubeV);
+
+		
+
+
+		
+		//draw copy of trajectory rotated around platform
+		
+
+		if (show_rotations)
+		{
+			for (int i = 1; i < traj_its; i++)
+			{
+
+				float full_angle = 2 * 3.14f;
+				float part_angle = (full_angle / (float)traj_its) * i;
+
+				model = glm::mat4(1.0f);
+				model = glm::rotate(model, part_angle, glm::vec3(0.f, 1.0f, 0.f));
+
+
+				shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, lineOb.color);
+				Geometry::DrawVArrayLineStrip(trajectory);
+
+			}
+		}
 
 
 		glBindVertexArray(0);
@@ -290,7 +344,7 @@ namespace Hollow {
 
 		if (ImGui::CollapsingHeader("Physics"))
 		{
-
+			/*
 			//line 
 			float line_s[3] = { line_start.x, line_start.y, line_start.z };
 			ImGui::SliderFloat3("line start", line_s, -10, 10);
@@ -302,14 +356,33 @@ namespace Hollow {
 			ImGui::SliderFloat3("line end", line_e, -10, 10);
 			line_end.x = line_e[0];
 			line_end.y = line_e[1];
-			line_end.z = line_e[2];
+			line_end.z = line_e[2];*/
 
 
 			//trajectory
-			ImGui::SliderFloat("velocity", &velocity, 0, 10);
+			ImGui::SliderFloat("velocity", &velocity, 5, 50);
 			ImGui::SliderFloat("angle", &angle, 0, 3.14f / 2.f);
 			ImGui::SliderFloat("gravity", &gravity, 5, 15);
 
+
+			float point[2] = { point_pos.x, point_pos.y };
+			ImGui::SliderFloat2("point position", point, -50, 50);
+			point_pos.x = point[0];
+			point_pos.y = point[1];
+
+			/*
+			ImGui::Checkbox("point in", &is_point_in);
+			if (is_point_in)
+			{
+				point_col = yes_col;
+			}
+			else
+			{
+				point_col = no_col;
+			}*/
+
+			ImGui::Checkbox("Show Trajectory Rotations", &show_rotations);
+			ImGui::SliderInt("number of rotations", &traj_its, 15, 100);
 
 		}
 
