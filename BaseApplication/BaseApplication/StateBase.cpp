@@ -13,6 +13,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include "implot.h"
+
 #include "Physics.h"
 
 
@@ -88,6 +90,13 @@ namespace Hollow {
 
 		point_col = glm::vec3(1.f, 1.f, 1.f);
 
+		plat_col = glm::vec3(1.f, 0.58f, 0.04f);
+
+
+
+		
+
+
 	}
 
 	void StateBase::frame(float dt, GLFWwindow* window, Input* in)
@@ -105,7 +114,9 @@ namespace Hollow {
 
 
 		//render guys
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		//glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.118f, 0.118f, 0.118f, 1.0f);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		if (wireFrameToggle) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
@@ -165,14 +176,21 @@ namespace Hollow {
 		//shaders.lineShader.UseShader(line_start, line_end, model, view, projection, lineOb.color);
 		//Geometry::DrawVArrayLine(line);
 
+
+		//calculate angle between point and trajectory
+
+		point_angle = Physics::get_angle_between_vectors2(glm::vec2(1, 0), glm::vec2(point_pos.x, point_pos.z));
+
+
 		//draw trajectory
 		model = glm::mat4(1.0f);
+		model = glm::rotate(model, point_angle, glm::vec3(0, 1, 0));
 		shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, lineOb.color);
 		Geometry::DrawVArrayLineStrip(trajectory);
 
 
 
-		if (Physics::trajectory_test(velocity, gravity, angle, point_pos))
+		if (Physics::trajectory_test(velocity, gravity, angle, line_start, point_pos))
 		{
 			point_col = yes_col;
 		}
@@ -190,6 +208,13 @@ namespace Hollow {
 		shaders.flatShader.UseShader(model, view, projection, point_col);
 		Geometry::DrawVArray(cubeV);
 
+		//draw platform
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, line_start);
+		model = glm::scale(model, lightCube.scale);
+
+		shaders.flatShader.UseShader(model, view, projection, plat_col);
+		Geometry::DrawVArray(cubeV);
 		
 
 
@@ -203,7 +228,7 @@ namespace Hollow {
 			{
 
 				float full_angle = 2 * 3.14f;
-				float part_angle = (full_angle / (float)traj_its) * i;
+				float part_angle = point_angle + (full_angle / (float)traj_its) * i;
 
 				model = glm::mat4(1.0f);
 				model = glm::rotate(model, part_angle, glm::vec3(0.f, 1.0f, 0.f));
@@ -365,10 +390,29 @@ namespace Hollow {
 			ImGui::SliderFloat("gravity", &gravity, 5, 15);
 
 
-			float point[2] = { point_pos.x, point_pos.y };
-			ImGui::SliderFloat2("point position", point, -50, 50);
+			float point[3] = { point_pos.x, point_pos.y, point_pos.z };
+			ImGui::SliderFloat("point position x", point, -30, 30);
+			ImGui::SliderFloat("point position y", &point[1], -50, 20);
+			ImGui::SliderFloat("point position z", &point[2], -30, 30);
 			point_pos.x = point[0];
 			point_pos.y = point[1];
+			point_pos.z = point[2];
+
+
+			//angle, magnitude, height controls
+			point_angle = Physics::get_angle_between_vectors2(glm::vec2(1, 0), glm::vec2(point_pos.x, point_pos.z));
+			glm::vec2 pr(point_pos.x, point_pos.z);
+			point_mag = glm::length(pr);
+			point_height = point_pos.y;
+
+			//ImGui::SliderFloat("point angle", &point_angle, -10, 10);
+			//ImGui::SliderFloat("point magnitude", &point_mag, 0.2f, 50.f);
+			//ImGui::SliderFloat("point height", &point_height, -50.f, 50.f);
+
+
+			//point_pos.x = point_mag * cosf(point_angle);
+			//point_pos.z = point_mag * sinf(point_angle);
+			//point_pos.y = point_height;
 
 			/*
 			ImGui::Checkbox("point in", &is_point_in);
@@ -386,6 +430,86 @@ namespace Hollow {
 
 		}
 
+
+
+
+
+
+
+		//draw graphs
+		if (ImGui::CollapsingHeader("graphs"))
+		{
+
+
+
+			//fill graph data
+
+			glm::vec2 pr(point_pos.x, point_pos.z);
+			point_mag = glm::length(pr);
+			float mag = glm::length(pr);
+
+			for (int i = 0; i < 1000; i++)
+			{
+
+
+				float c = tanf(angle);
+
+				float d = gravity / (2 * velocity * velocity * cosf(angle) * cosf(angle));
+
+
+				traj_xs[i] = i * 0.1f;
+
+				//traj_ys[i] = traj_xs[i] * (tanf(angle) - (traj_xs[i] * (gravity / (2.f * velocity * velocity * cosf(angle) * cosf(angle)))));
+				traj_ys[i] = (traj_xs[i] * c) - (traj_xs[i] * traj_xs[i] * d);
+			
+				float tx = traj_xs[i];
+
+				float a = mag;
+				float b = point_pos.y;
+
+				dist_xs[i] = traj_xs[i];
+				dist_ys[i] = (powf(d, 2) * powf(tx, 4)) - (2 * c * d * powf(tx, 3)) + ((1 + c + (2 * b * d)) * powf(tx, 2)) - ((2 * a + 2 * c * b) * tx) + powf(a, 2) + powf(b, 2);
+
+				dist_root_xs[i] = tx;
+				dist_root_ys[i] = sqrtf(dist_ys[i]);
+			
+
+
+				der_xs[i] = tx;
+				der_ys[i] = (4 * powf(d, 2) * powf(tx, 3)) - (6 * c * d * powf(tx, 2)) + ((2 + 2 * c + 4 * b * d) * tx) - (2 * a + 2 * c * b);
+
+			
+			}
+
+
+
+		
+
+
+			if (ImPlot::BeginPlot("Test Plot"))
+			{
+
+				ImPlot::PlotLine("Trajectory", traj_xs, traj_ys, 1000);
+
+				ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+
+				ImPlot::PlotLine("Point", &mag, &point_pos.y, 1);
+
+				ImPlot::PlotLine("Distance Squared", dist_xs, dist_ys, 1000);
+				ImPlot::PlotLine("Distance", dist_root_xs, dist_root_ys, 1000);
+				ImPlot::PlotLine("Derivative of Distance Squared", der_xs, der_ys, 1000);
+
+
+
+
+
+				ImPlot::EndPlot();
+			}
+			
+			
+
+
+		}
 
 
 	}

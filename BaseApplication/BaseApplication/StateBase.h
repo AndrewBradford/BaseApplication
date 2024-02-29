@@ -89,13 +89,37 @@ namespace Hollow {
 
 		bool is_point_in;
 
+
 		glm::vec3 yes_col;
 		glm::vec3 no_col;
 
 		glm::vec3 point_col;
+		glm::vec3 plat_col;
 
 		bool show_rotations = false;
 		int traj_its = 10;
+
+		float point_angle = 0;
+		float point_mag = 1;
+		float point_height = 0;
+
+
+		float xs[3] = { 0,1,2 };
+		float ys[3] = { 5,10,2 };
+
+		float traj_xs[1000];
+		float traj_ys[1000];
+
+		float dist_xs[1000];
+		float dist_ys[1000];
+
+		float dist_root_xs[1000];
+		float dist_root_ys[1000];
+
+		float der_xs[1000];
+		float der_ys[1000];
+
+
 	};
 
 }
