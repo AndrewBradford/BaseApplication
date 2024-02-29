@@ -108,6 +108,18 @@ namespace Hollow {
 		void UseShader(glm::vec3& start, glm::vec3& end, glm::mat4& model, glm::mat4& view, glm::mat4& proj, glm::vec3 objectCol);
 	};
 
+	class TrajShader : public Shader
+	{
+	public:
+		TrajShader()
+			: Shader{ "shaders/trajectoryshader.vert","shaders/trajectoryshader.frag" }
+		{
+		};
+		~TrajShader() {};
+
+		void UseShader(float& gravity, float& angle, float& velocity, glm::mat4& model, glm::mat4& view, glm::mat4& proj, glm::vec3 objectCol);
+	};
+
 	class TexShader : public Shader
 	{
 		TexShader(const char* vertexPath, const char* fragmentPath)

@@ -213,7 +213,7 @@ namespace Hollow {
 	{
 
 		glBindVertexArray(VAO.ID);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, VAO.VBO.vertNum);
 
 
 	}
@@ -222,7 +222,16 @@ namespace Hollow {
 	{
 
 		glBindVertexArray(VAO.ID);
-		glDrawArrays(GL_LINES, 0, 2);
+		glDrawArrays(GL_LINES, 0, VAO.VBO.vertNum);
+		
+
+	}
+
+	void Geometry::DrawVArrayLineStrip(VArray VAO)
+	{
+
+		glBindVertexArray(VAO.ID);
+		glDrawArrays(GL_LINE_STRIP, 0, VAO.VBO.vertNum);
 
 
 	}

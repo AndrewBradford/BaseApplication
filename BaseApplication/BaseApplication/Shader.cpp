@@ -152,6 +152,28 @@ namespace Hollow {
 	
 	}
 
+	void TrajShader::UseShader(float& gravity, float& angle, float& velocity, glm::mat4& model, glm::mat4& view, glm::mat4& proj, glm::vec3 objectCol)
+	{
+
+		glUseProgram(ID);
+
+		//set uniforms
+
+		//vertex shader
+		setMatrix4f("model", model);
+		setMatrix4f("view", view);
+		setMatrix4f("projection", proj);
+
+		setFloat("gravity", gravity);
+		setFloat("angle", angle);
+		setFloat("velocity", velocity);
+
+		//fragment shader
+		setVec3("objectColor", objectCol);
+
+
+	}
+
 	void TexShader::UseShader(glm::mat4& model, glm::mat4& view, glm::mat4& proj
 		, unsigned int texID, unsigned int texUnit)
 	{

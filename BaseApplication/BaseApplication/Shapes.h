@@ -140,6 +140,43 @@ namespace Hollow {
 
 	};
 
+	class Trajectory : public Shape
+	{
+
+	public:
+
+		Trajectory() : Shape{ 100,3,0,3,0,0,0 }
+		{
+
+			for (int i = 0; i < 100; i++)
+			{
+				vertices[i * 3 + 0] = i * 0.5f;
+				vertices[i * 3 + 1] = 0.f;
+				vertices[i * 3 + 2] = 0.f;
+
+			}
+
+		};
+		~Trajectory() {};
+
+		float vertices[100 * 3];
+
+
+		size_t getVertexSize() override {
+			return sizeof(vertices);
+		}
+		float* getVertexRef() override {
+			return vertices;
+		}
+
+		size_t getIndexSize() override {
+			return 0;
+		}
+		float* getIndexRef() override {
+			return nullptr;
+		}
+
+	};
 
 
 }

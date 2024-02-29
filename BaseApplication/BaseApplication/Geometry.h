@@ -68,6 +68,7 @@ namespace Hollow {
 		static void DrawVArray(VArray VAO);
 
 		static void DrawVArrayLine(VArray VAO);
+		static void DrawVArrayLineStrip(VArray VAO);
 
 	private:
 

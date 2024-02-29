@@ -22,6 +22,7 @@ namespace Hollow {
 			LitShader litShader;
 			FlatShader flatShader;
 			LineShader lineShader;
+			TrajShader trajShader;
 		};
 
 		struct GObject {
@@ -61,6 +62,7 @@ namespace Hollow {
 		VArray cubeVN;
 		VArray cubeV;
 		VArray line;
+		VArray trajectory;
 
 		GObject cube;
 		GObject lightCube;
@@ -79,7 +81,9 @@ namespace Hollow {
 		glm::vec3 line_start;
 		glm::vec3 line_end;
 
-
+		float velocity;
+		float angle;
+		float gravity;
 
 	};
 

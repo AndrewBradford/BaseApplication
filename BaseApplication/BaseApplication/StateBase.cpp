@@ -48,7 +48,10 @@ namespace Hollow {
 		delete lineptr;
 		lineptr = nullptr;
 
-
+		Shape* trajptr = new Trajectory();
+		trajectory = Geometry::SetupVAO(trajptr);
+		delete trajptr;
+		trajptr = nullptr;
 
 
 		cube.color = glm::vec3(1.0f, 0.5f, 0.31f);
@@ -71,6 +74,10 @@ namespace Hollow {
 
 		line_start = glm::vec3(0.0f, 0.0f, 0.0f);
 		line_end = glm::vec3(1.f, 1.f, 1.f);
+
+		gravity = 9.8f;
+		velocity = 10.f;
+		angle = 3.14f / 4.f;
 
 	}
 
@@ -149,7 +156,10 @@ namespace Hollow {
 		shaders.lineShader.UseShader(line_start, line_end, model, view, projection, lineOb.color);
 		Geometry::DrawVArrayLine(line);
 
-
+		//draw trajectory
+		model = glm::mat4(1.0f);
+		shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, lineOb.color);
+		Geometry::DrawVArrayLineStrip(trajectory);
 
 
 		glBindVertexArray(0);
@@ -295,6 +305,10 @@ namespace Hollow {
 			line_end.z = line_e[2];
 
 
+			//trajectory
+			ImGui::SliderFloat("velocity", &velocity, 0, 10);
+			ImGui::SliderFloat("angle", &angle, 0, 3.14f / 2.f);
+			ImGui::SliderFloat("gravity", &gravity, 5, 15);
 
 
 		}
