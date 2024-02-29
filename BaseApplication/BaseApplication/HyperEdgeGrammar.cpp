@@ -1023,6 +1023,7 @@ void HyperEdgeGrammar::make_rules()
 void HyperEdgeGrammar::reset_graph()
 {
 	make_starting_graph();
+	replacement_count = 0;
 }
 
 
@@ -1066,6 +1067,10 @@ void HyperEdgeGrammar::single_replacement(GLFWwindow* window, std::string prefix
 			break;
 		}
 	}
+	if (rule_applied == nullptr)
+	{
+		return;
+	}
 
 	//remove hyperedge from attachment nodes
 	hyperedge_to_replace->delete_from_attachment_nodes(&level_graph);
@@ -1082,7 +1087,7 @@ void HyperEdgeGrammar::single_replacement(GLFWwindow* window, std::string prefix
 
 	//copy replacement graph to clipboard
 	//replacement_graph.output_dot(window);
-	rule_applied->replacement_graph.output_dot(window);
+	if (rule_applied) { rule_applied->replacement_graph.output_dot(window); }
 }
 
 
