@@ -10,6 +10,8 @@
 
 #include "HyperEdgeGrammar.h"
 
+#include <vector>
+
 namespace Hollow {
 
 
@@ -119,6 +121,13 @@ namespace Hollow {
 		float der_xs[1000];
 		float der_ys[1000];
 
+		std::vector<float> x_points;
+		std::vector<float> y_points;
+
+		float tan_xs[1000];
+		float tan_ys[1000];
+
+		float x_calc = 0;
 
 	};
 

@@ -172,9 +172,9 @@ namespace Hollow {
 		}*/
 
 		// draw line
-		//model = glm::mat4(1.0f);
-		//shaders.lineShader.UseShader(line_start, line_end, model, view, projection, lineOb.color);
-		//Geometry::DrawVArrayLine(line);
+		model = glm::mat4(1.0f);
+		shaders.lineShader.UseShader(line_start, point_pos, model, view, projection, lineOb.color);
+		Geometry::DrawVArrayLine(line);
 
 
 		//calculate angle between point and trajectory
@@ -185,7 +185,7 @@ namespace Hollow {
 		//draw trajectory
 		model = glm::mat4(1.0f);
 		model = glm::rotate(model, point_angle, glm::vec3(0, 1, 0));
-		shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, lineOb.color);
+		shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, point_col);
 		Geometry::DrawVArrayLineStrip(trajectory);
 
 
@@ -205,7 +205,7 @@ namespace Hollow {
 		model = glm::translate(model, point_pos);
 		model = glm::scale(model, lightCube.scale);
 
-		shaders.flatShader.UseShader(model, view, projection, point_col);
+		shaders.flatShader.UseShader(model, view, projection, plat_col);
 		Geometry::DrawVArray(cubeV);
 
 		//draw platform
@@ -432,21 +432,60 @@ namespace Hollow {
 
 
 
-
-
-
-
 		//draw graphs
 		if (ImGui::CollapsingHeader("graphs"))
 		{
-
-
-
-			//fill graph data
-
 			glm::vec2 pr(point_pos.x, point_pos.z);
 			point_mag = glm::length(pr);
 			float mag = glm::length(pr);
+
+			ImGui::SliderFloat("Show calculation", &x_calc, 0, 100);
+			float r = 0;
+
+			if (ImGui::Button("show maths"))
+			{
+				float a = mag;
+				float b = point_pos.y;
+
+				float c = tanf(angle);
+
+				float d = gravity / (2 * velocity * velocity * cosf(angle) * cosf(angle));
+
+				float tx = x_calc; 
+				float ty = (tx * c) - (tx * tx * d);
+
+				float d2x = (powf(d, 2) * powf(tx, 4)) - (2 * c * d * powf(tx, 3)) + ((1 + c + (2 * b * d)) * powf(tx, 2)) + ((-2 * a - (2 * c * b)) * tx) + powf(a, 2) + powf(b, 2);
+				r = d2x;
+
+				float dpx = (4 * powf(d, 2) * powf(tx, 3)) - (6 * c * d * powf(tx, 2)) + ((2 + (2 * c) + (4 * b * d)) * tx) + ((-2 * a) - (2 * c * b));
+				//r = dpx; 
+
+
+				float cosa = cosf(angle);
+				float y = tx * (tanf(angle) - (tx * (gravity / (2 * velocity * velocity * cosa * cosa))));
+
+				std::cout << "point: (" << a << ", ";
+				std::cout << b << ")\n";
+				std::cout << "gravity: " << gravity << ", velocity: " << velocity << ", angle: " << angle;
+				std::cout << "c = " << c << ",  d = " << d;
+				std::cout << "\ntrajectory: (" << tx << ", " << ty << ")\n";
+				std::cout << "alt trajectory: (" << tx << ", " << y << ")\n";
+				std::cout << "dist sq: " << d2x << ", dist: " << sqrtf(d2x) << "\n";
+				glm::vec2 ta(tx, ty); glm::vec2 tb(a, b);
+				glm::vec2 tr = tb - ta;
+				std::cout << "calc distance: " << glm::length(tr);
+				std::cout << "\ngradient: " << dpx;
+				
+			}
+
+
+			//ImGui::SliderFloat("result: ", &r, -100, 100);
+
+			//fill graph data
+
+
+			x_points.clear();
+			y_points.clear();
 
 			for (int i = 0; i < 1000; i++)
 			{
@@ -468,16 +507,30 @@ namespace Hollow {
 				float b = point_pos.y;
 
 				dist_xs[i] = traj_xs[i];
-				dist_ys[i] = (powf(d, 2) * powf(tx, 4)) - (2 * c * d * powf(tx, 3)) + ((1 + c + (2 * b * d)) * powf(tx, 2)) - ((2 * a + 2 * c * b) * tx) + powf(a, 2) + powf(b, 2);
+				dist_ys[i] = (powf(d, 2) * powf(tx, 4)) - (2 * c * d * powf(tx, 3)) + ((1 + powf(c, 2) + (2 * b * d)) * powf(tx, 2)) + ((-2 * a - (2 * c * b)) * tx) + powf(a, 2) + powf(b, 2);
 
 				dist_root_xs[i] = tx;
 				dist_root_ys[i] = sqrtf(dist_ys[i]);
 			
-
-
 				der_xs[i] = tx;
-				der_ys[i] = (4 * powf(d, 2) * powf(tx, 3)) - (6 * c * d * powf(tx, 2)) + ((2 + 2 * c + 4 * b * d) * tx) - (2 * a + 2 * c * b);
+				der_ys[i] = (4 * powf(d, 2) * powf(tx, 3)) - (6 * c * d * powf(tx, 2)) + ((1 + powf(c,2) + (2 * b * d)) * 2 * tx) + ((-2 * a) - (2 * c * b));
 
+				if (der_ys[i] >= -0.3f && der_ys[i] <= 0.3f)
+				{
+					//x_points.push_back(der_xs[i]);
+					//y_points.push_back(der_ys[i]);
+
+					x_points.push_back(der_xs[i]);
+					y_points.push_back(traj_ys[i]);
+
+					x_points.push_back(a);
+					y_points.push_back(b);
+
+
+				}
+
+				tan_xs[i] = tx;
+				tan_ys[i] = d;
 			
 			}
 
@@ -497,11 +550,15 @@ namespace Hollow {
 
 				ImPlot::PlotLine("Distance Squared", dist_xs, dist_ys, 1000);
 				ImPlot::PlotLine("Distance", dist_root_xs, dist_root_ys, 1000);
+				//ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
 				ImPlot::PlotLine("Derivative of Distance Squared", der_xs, der_ys, 1000);
 
+				//ImPlot::SetNextLineStyle(ImPlotLineFlags_None)
+				ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+				ImPlot::PlotLine("Closest Points", x_points.data(), y_points.data(), x_points.size(), ImPlotLineFlags_Segments);
 
 
-
+				ImPlot::PlotLine("tan(angle)", tan_xs, tan_ys, 1000);
 
 				ImPlot::EndPlot();
 			}

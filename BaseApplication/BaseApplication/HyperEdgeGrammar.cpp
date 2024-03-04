@@ -463,7 +463,7 @@ void Graph::output_dot(GLFWwindow* window)
 	for (auto h : hyperedges)
 	{
 		//  hyperedge name [shape = square]
-		out += h.second.get_name() + Hyperedge::text_from_label(h.second.get_label()) + " [shape = square]\n";
+		out += h.second.get_name() + Hyperedge::text_from_label(h.second.get_label()) + " [shape = square];\n";
 		//	hyperedge name -> {
 		out += h.second.get_name() + Hyperedge::text_from_label(h.second.get_label());
 		out += " -> { ";
