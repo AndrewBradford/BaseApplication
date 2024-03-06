@@ -12,6 +12,8 @@
 
 #include <vector>
 
+#include "Physics.h"
+
 namespace Hollow {
 
 
@@ -55,6 +57,8 @@ namespace Hollow {
 
 		void gui();
 
+		void draw_space_graph();
+
 	private:
 
 		Camera camera;
@@ -75,6 +79,8 @@ namespace Hollow {
 
 		HyperEdgeGrammar grammar;
 
+		Physics phys;
+
 		//gui variables
 		float frameTime = 0.0f;
 		bool debugBool = false;
@@ -88,6 +94,7 @@ namespace Hollow {
 		float gravity;
 
 		glm::vec3 point_pos;
+		glm::vec3 closest_point_pos;
 
 		bool is_point_in;
 
@@ -97,6 +104,8 @@ namespace Hollow {
 
 		glm::vec3 point_col;
 		glm::vec3 plat_col;
+
+		bool calc_closest_point = false;
 
 		bool show_rotations = false;
 		int traj_its = 10;

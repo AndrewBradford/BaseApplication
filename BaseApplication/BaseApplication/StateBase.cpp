@@ -15,7 +15,6 @@
 
 #include "implot.h"
 
-#include "Physics.h"
 
 
 namespace Hollow {
@@ -92,7 +91,7 @@ namespace Hollow {
 
 		plat_col = glm::vec3(1.f, 0.58f, 0.04f);
 
-
+		closest_point_pos = line_start;
 
 		
 
@@ -171,72 +170,113 @@ namespace Hollow {
 			Geometry::DrawVArray(cubeVN);
 		}*/
 
-		// draw line
-		model = glm::mat4(1.0f);
-		shaders.lineShader.UseShader(line_start, point_pos, model, view, projection, lineOb.color);
-		Geometry::DrawVArrayLine(line);
+
+		draw_space_graph();
 
 
-		//calculate angle between point and trajectory
-
-		point_angle = Physics::get_angle_between_vectors2(glm::vec2(1, 0), glm::vec2(point_pos.x, point_pos.z));
-
-
-		//draw trajectory
-		model = glm::mat4(1.0f);
-		model = glm::rotate(model, point_angle, glm::vec3(0, 1, 0));
-		shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, point_col);
-		Geometry::DrawVArrayLineStrip(trajectory);
-
-
-
-		if (Physics::trajectory_test(velocity, gravity, angle, line_start, point_pos))
+		if (false)
 		{
-			point_col = yes_col;
-		}
-		else
-		{
-			point_col = no_col;
-		}
+
+			// draw line
+			model = glm::mat4(1.0f);
+			shaders.lineShader.UseShader(line_start, point_pos, model, view, projection, lineOb.color);
+			Geometry::DrawVArrayLine(line);
 
 
-		//draw point
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, point_pos);
-		model = glm::scale(model, lightCube.scale);
+			//calculate angle between point and trajectory
 
-		shaders.flatShader.UseShader(model, view, projection, plat_col);
-		Geometry::DrawVArray(cubeV);
-
-		//draw platform
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, line_start);
-		model = glm::scale(model, lightCube.scale);
-
-		shaders.flatShader.UseShader(model, view, projection, plat_col);
-		Geometry::DrawVArray(cubeV);
-		
+			point_angle = Physics::get_angle_between_vectors2(glm::vec2(1, 0), glm::vec2(point_pos.x, point_pos.z));
 
 
-		
-		//draw copy of trajectory rotated around platform
-		
+			//draw trajectory
+			model = glm::mat4(1.0f);
+			model = glm::rotate(model, point_angle, glm::vec3(0, 1, 0));
+			shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, point_col);
+			Geometry::DrawVArrayLineStrip(trajectory);
 
-		if (show_rotations)
-		{
-			for (int i = 1; i < traj_its; i++)
+
+
+			if (Physics::trajectory_test(velocity, gravity, angle, line_start, point_pos))
 			{
+				point_col = yes_col;
+			}
+			else
+			{
+				point_col = no_col;
+			}
 
-				float full_angle = 2 * 3.14f;
-				float part_angle = point_angle + (full_angle / (float)traj_its) * i;
 
-				model = glm::mat4(1.0f);
-				model = glm::rotate(model, part_angle, glm::vec3(0.f, 1.0f, 0.f));
+			//draw point
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, point_pos);
+			model = glm::scale(model, lightCube.scale);
+
+			shaders.flatShader.UseShader(model, view, projection, plat_col);
+			Geometry::DrawVArray(cubeV);
+
+			//draw platform
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, line_start);
+			model = glm::scale(model, lightCube.scale);
+
+			shaders.flatShader.UseShader(model, view, projection, plat_col);
+			Geometry::DrawVArray(cubeV);
 
 
-				shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, lineOb.color);
-				Geometry::DrawVArrayLineStrip(trajectory);
 
+			//calculate closest point
+			if (ImGui::Checkbox("Calculate Closest Point every frame", &calc_closest_point))
+			{
+				//closest_point_pos = Physics::get_closest_point(velocity, gravity, angle, line_start, point_pos);
+			}
+			if (ImGui::Button("Calculate Closest Point now") || calc_closest_point)
+			{
+				closest_point_pos = Physics::get_closest_point(velocity, gravity, angle, line_start, point_pos);
+			}
+
+
+			//draw effective x
+			/*
+			glm::vec3 proj_point = point_pos - line_start;
+			proj_point.y = 0.f;
+
+			model = glm::mat4(1.0f);
+			shaders.lineShader.UseShader(line_start, proj_point, model, view, projection, lineOb.color);
+			Geometry::DrawVArrayLine(line);*/
+
+			//draw closest point
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, closest_point_pos);
+			model = glm::scale(model, lightCube.scale);
+
+			shaders.flatShader.UseShader(model, view, projection, lineOb.color);
+			Geometry::DrawVArray(cubeV);
+
+
+			model = glm::mat4(1.0f);
+			shaders.lineShader.UseShader(closest_point_pos, point_pos, model, view, projection, lineOb.color);
+			Geometry::DrawVArrayLine(line);
+
+
+			//draw copy of trajectory rotated around platform
+
+
+			if (show_rotations)
+			{
+				for (int i = 1; i < traj_its; i++)
+				{
+
+					float full_angle = 2 * 3.14f;
+					float part_angle = point_angle + (full_angle / (float)traj_its) * i;
+
+					model = glm::mat4(1.0f);
+					model = glm::rotate(model, part_angle, glm::vec3(0.f, 1.0f, 0.f));
+
+
+					shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, lineOb.color);
+					Geometry::DrawVArrayLineStrip(trajectory);
+
+				}
 			}
 		}
 
@@ -567,6 +607,94 @@ namespace Hollow {
 
 
 		}
+
+
+	}
+
+	void StateBase::draw_space_graph()
+	{
+
+
+
+
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1440.0f / 960.0f, 0.1f, 300.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 model = glm::mat4(1.0f);
+
+
+
+		for (SpaceNode sn : phys.space_graph)
+		{
+
+			//draw platform
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, sn.position);
+			model = glm::scale(model, lightCube.scale);
+
+			shaders.flatShader.UseShader(model, view, projection, sn.color);
+			Geometry::DrawVArray(cubeV);
+			
+
+			//draw each attached constraint (from previous platform)
+			if (sn.constraints.size() > 0)
+			{
+				for (Constraint c : sn.constraints)
+				{
+
+					// draw line
+					model = glm::mat4(1.0f);
+					shaders.lineShader.UseShader(sn.position, phys.space_graph[c.index].position, model, view, projection, lineOb.color);
+					Geometry::DrawVArrayLine(line);
+
+					glm::vec3 t_col = yes_col;
+
+					if (Physics::trajectory_test(c.t_info, phys.space_graph[c.index].position, sn.position))
+					{
+						point_col = yes_col;
+					}
+					else
+					{
+						point_col = no_col;
+					}
+
+
+					glm::vec3 diff = sn.position - phys.space_graph[c.index].position;
+
+					//calculate angle between point and trajectory
+					float ang = Physics::get_angle_between_vectors2(glm::vec2(1, 0), glm::vec2(diff.x, diff.z));
+
+
+					//draw trajectory
+					model = glm::mat4(1.0f);
+					model = glm::translate(model, phys.space_graph[c.index].position);
+					model = glm::rotate(model, ang, glm::vec3(0, 1, 0));
+					shaders.trajShader.UseShader(c.t_info.gravity, c.t_info.angle, c.t_info.velocity, model, view, projection, point_col);
+					Geometry::DrawVArrayLineStrip(trajectory);
+
+
+
+
+				}
+
+			}
+
+
+
+
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	}
