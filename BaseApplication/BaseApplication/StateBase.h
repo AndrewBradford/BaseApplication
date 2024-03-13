@@ -95,6 +95,7 @@ namespace Hollow {
 
 		glm::vec3 point_pos;
 		glm::vec3 closest_point_pos;
+		glm::vec3 point_offset;
 
 		bool is_point_in;
 
@@ -106,6 +107,9 @@ namespace Hollow {
 		glm::vec3 plat_col;
 
 		bool calc_closest_point = false;
+
+		bool show_lines = true;
+		bool physics_updates = false;
 
 		bool show_rotations = false;
 		int traj_its = 10;
@@ -137,6 +141,14 @@ namespace Hollow {
 		float tan_ys[1000];
 
 		float x_calc = 0;
+
+		float gen_angle = 3.14f / 2.f;
+		float z_offset = 0.f;
+		float stretch = 50.f;
+
+		bool show_process = true;
+
+		float move_point = 0.f;
 
 	};
 
