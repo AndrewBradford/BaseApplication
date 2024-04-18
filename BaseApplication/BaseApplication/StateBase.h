@@ -55,11 +55,20 @@ namespace Hollow {
 		void Cleanup();
 
 
-		void gui();
+		void gui(GLFWwindow* window);
 
 		void draw_space_graph();
+		void DrawTrajectoryDemo();
+		void DrawLevel();
 
 	private:
+
+		void ShowMainControls(GLFWwindow* window);
+		void ShowTrajectoryDemoControls();
+		void ShowExampleLevelControls();
+		void ShowDataCollectionControls();
+		void ShowGraphs();
+
 
 		Camera camera;
 
@@ -115,7 +124,7 @@ namespace Hollow {
 		bool show_constraints = true;
 		bool physics_updates = false;
 
-		float speed = 1.5f;
+		float speed = 20.f;
 
 		bool show_rotations = false;
 		int traj_its = 10;
@@ -146,13 +155,13 @@ namespace Hollow {
 		float tan_xs[1000];
 		float tan_ys[1000];
 
-		float x_calc = 0;
+		//float x_calc = 0;
 
 		float gen_angle = 3.14f / 2.f;
 		float z_offset = 0.f;
 		float stretch = 50.f;
 
-		bool show_process = true;
+		bool show_process = false;
 
 		float move_point = 0.f;
 

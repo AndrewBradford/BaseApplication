@@ -172,8 +172,8 @@ public:
 	Physics()
 	{
 		build_constraint_map();
-		//make_test_graph(glm::vec3(1, 0, 0), 0.f, 50.f);
-		make_test_graph_branch(glm::vec3(1, 0, 0), 0.f, 50.f);
+		make_test_graph(glm::vec3(1, 0, 0), 0.f, 50.f);
+		//make_test_graph_branch(glm::vec3(1, 0, 0), 0.f, 50.f);
 		std::srand(std::time(0));
 	}
 
@@ -696,6 +696,35 @@ public:
 
 	}
 
+	bool constraints_resolved()
+	{
+		for (int i = 0; i < space_graph.size(); i++)
+		{
+			if (space_graph[i].constraints.size() > 0)
+			{
+				for (const Constraint& c : space_graph[i].constraints)
+				{
+
+					//check if already within trajectory
+					if (!trajectory_test(c.t_info, space_graph[c.index].position, space_graph[i].position))
+					{
+
+						return false;
+
+					}
+					else
+					{
+						//c.is_satisfied = true;
+					}
+
+
+
+				}
+			}
+		}
+		return true;
+	}
+
 	void resolve_constraints()
 	{
 
@@ -732,6 +761,47 @@ public:
 
 	}
 
+	void resolve_all_constraints()
+	{
+		int counter = 0;
+		
+		while (!constraints_resolved())
+		{
+
+			for (int i = 0; i < space_graph.size(); i++)
+			{
+				if (space_graph[i].constraints.size() > 0)
+				{
+					for (const Constraint& c : space_graph[i].constraints)
+					{
+
+						//check if already within trajectory
+						if (!trajectory_test(c.t_info, space_graph[c.index].position, space_graph[i].position))
+						{
+							//if not, find closest point and move there
+							glm::vec3 closest = get_closest_point(c.t_info, space_graph[c.index].position, space_graph[i].position);
+							space_graph[i].position = closest + overshoot(space_graph[i].position, closest, 0.1f);
+
+							color_graph();
+							counter++;
+							if (counter >= 100)
+							{
+								return;
+							}
+						}
+
+
+
+					}
+				}
+
+			}
+		}
+		color_graph();
+
+
+	}
+
 	void construct_graph(Graph& graph)
 	{
 		// step through the graph and add each gameplay node to space graph
@@ -748,7 +818,14 @@ public:
 		{
 
 			sn.name = node.second.get_name();
-			sn.position = random_pos();
+			if (sn.name == "start")
+			{
+				sn.position = glm::vec3(0, 0, 0);
+			}
+			else
+			{
+				sn.position = random_pos();
+			}
 			sn.is_hyper = false;
 
 			space_graph.push_back(sn);

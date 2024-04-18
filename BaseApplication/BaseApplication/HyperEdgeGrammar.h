@@ -240,6 +240,8 @@ public:
 
 	void generate_graph(GLFWwindow* window);
 	void single_replacement(GLFWwindow* window, std::string prefix);
+	void GenerateWholeGraph(GLFWwindow* window);
+	
 
 	Graph get_output_graph();
 

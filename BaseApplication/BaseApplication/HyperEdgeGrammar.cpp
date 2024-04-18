@@ -1042,20 +1042,17 @@ void HyperEdgeGrammar::reset_graph()
 void HyperEdgeGrammar::generate_graph(GLFWwindow* window)
 {
 
-	if (ImGui::Button("Single Replacement + Copy Replacement Graph"))
+
+	if (level_graph.do_hyperedges_remain())
 	{
-
-
-		if (level_graph.do_hyperedges_remain())
-		{
-			char pre = 'a' + replacement_count;
-			std::string pr; 
-			pr.push_back(pre);
-			std::string prefix = pr + "_";
-			single_replacement(window, prefix);
-			replacement_count++;
-		}
+		char pre = 'a' + replacement_count;
+		std::string pr;
+		pr.push_back(pre);
+		std::string prefix = pr + "_";
+		single_replacement(window, prefix);
+		replacement_count++;
 	}
+	
 
 }
 
@@ -1101,6 +1098,19 @@ void HyperEdgeGrammar::single_replacement(GLFWwindow* window, std::string prefix
 	if (rule_applied) { rule_applied->replacement_graph.output_dot(window); }
 }
 
+void HyperEdgeGrammar::GenerateWholeGraph(GLFWwindow* window)
+{
+	while (level_graph.do_hyperedges_remain())
+	{
+		char pre = 'a' + replacement_count;
+		std::string pr;
+		pr.push_back(pre);
+		std::string prefix = pr + "_";
+		single_replacement(window, prefix);
+		replacement_count++;
+	}
+
+}
 
 Graph HyperEdgeGrammar::get_output_graph()
 {

@@ -98,7 +98,19 @@ namespace Hollow {
 		closest_point_pos = line_start;
 		point_offset = line_start;
 
-		
+
+		//reset gameplay graph
+		grammar.reset_graph();
+
+		//perform all trasformations
+		grammar.GenerateWholeGraph(window);
+
+		//generate random game space
+		Graph gameplay_graph = grammar.get_output_graph();
+		phys.construct_graph(gameplay_graph);
+
+		//resolve all constraints
+		phys.resolve_all_constraints();
 
 
 	}
@@ -175,17 +187,18 @@ namespace Hollow {
 			Geometry::DrawVArray(cubeVN);
 		}*/
 
-		ImGui::Checkbox("show process", &show_process);
-		ImGui::Checkbox("show lines", &show_lines);
+		//ImGui::Checkbox("show process", &show_process);
+		//ImGui::Checkbox("show lines", &show_lines);
+		/*
 		if (ImGui::Checkbox("show constraints", &show_constraints))
 		{
 
 			phys.color_graph();
 
-		}
-		ImGui::Checkbox("update physics every frame", &physics_updates);
+		}*/
+		//ImGui::Checkbox("update physics every frame", &physics_updates);
 
-		ImGui::SliderFloat("particle speed", &speed, 0.f, 10.f);
+		//ImGui::SliderFloat("particle speed", &speed, 0.f, 10.f);
 
 		if (physics_updates)
 		{
@@ -193,10 +206,12 @@ namespace Hollow {
 			phys.particle_update(speed, dt);
 		}
 
-		if (show_process)
+		if (!show_process)
 		{
+			
+			
 			draw_space_graph();
-
+			/*
 			ImGui::SliderFloat("gen angle", &gen_angle, 0.f, 3.14f);
 			ImGui::SliderFloat("z wobble", &z_offset, -50.f, 50.f);
 			ImGui::SliderFloat("stretch factor", &stretch, 10.f, 100.f);
@@ -231,7 +246,7 @@ namespace Hollow {
 			{
 				phys.resolve_constraints();
 				phys.color_graph();
-			} 
+			} */
 			/*
 			ImGui::SliderFloat("move pos", &move_point, -100.f, 100.f);
 			if (ImGui::Button("move"))
@@ -269,116 +284,7 @@ namespace Hollow {
 		}
 		else
 		{
-
-			glm::vec3 t_orig = point_offset;
-			glm::vec3 t_point = point_offset + point_pos;
-
-
-
-			// draw line
-			model = glm::mat4(1.0f);
-			//model = glm::translate(model, t_orig);
-			//shaders.lineShader.UseShader(t_orig, t_point, model, view, projection, lineOb.color);
-			//Geometry::DrawVArrayLine(line);
-
-
-			//calculate angle between point and trajectory
-
-			point_angle = Physics::get_angle_between_vectors2(glm::vec2(1, 0), glm::vec2(t_point.x, t_point.z));
-
-
-			//draw trajectory
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, t_orig);
-			model = glm::rotate(model, point_angle, glm::vec3(0, 1, 0));
-			shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, point_col);
-			Geometry::DrawVArrayLineStrip(trajectory);
-
-
-
-			if (Physics::trajectory_test(velocity, gravity, angle, t_orig, t_point))
-			{
-				point_col = yes_col;
-			}
-			else
-			{
-				point_col = no_col;
-			}
-
-
-			//draw point
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, t_point);
-			model = glm::scale(model, lightCube.scale);
-
-			shaders.flatShader.UseShader(model, view, projection, plat_col);
-			Geometry::DrawVArray(cubeV);
-
-			//draw platform
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, t_orig);
-			model = glm::scale(model, lightCube.scale);
-
-			shaders.flatShader.UseShader(model, view, projection, plat_col);
-			Geometry::DrawVArray(cubeV);
-
-
-
-			//calculate closest point
-			if (ImGui::Checkbox("Calculate Closest Point every frame", &calc_closest_point))
-			{
-				//closest_point_pos = Physics::get_closest_point(velocity, gravity, angle, line_start, point_pos);
-			}
-			if (ImGui::Button("Calculate Closest Point now") || calc_closest_point)
-			{
-				closest_point_pos = Physics::get_closest_point(velocity, gravity, angle, t_orig, t_point);
-			}
-
-
-			//draw effective x
-			/*
-			glm::vec3 proj_point = point_pos - line_start;
-			proj_point.y = 0.f;
-
-			model = glm::mat4(1.0f);
-			shaders.lineShader.UseShader(line_start, proj_point, model, view, projection, lineOb.color);
-			Geometry::DrawVArrayLine(line);*/
-
-			//draw closest point
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, closest_point_pos);
-			model = glm::scale(model, lightCube.scale);
-
-			shaders.flatShader.UseShader(model, view, projection, lineOb.color);
-			Geometry::DrawVArray(cubeV);
-
-			
-			model = glm::mat4(1.0f);
-			shaders.lineShader.UseShader(closest_point_pos, t_point, model, view, projection, lineOb.color);
-			Geometry::DrawVArrayLine(line);
-
-
-			//draw copy of trajectory rotated around platform
-
-			
-			if (show_rotations)
-			{
-				for (int i = 1; i < traj_its; i++)
-				{
-
-					float full_angle = 2 * 3.14f;
-					float part_angle = point_angle + (full_angle / (float)traj_its) * i;
-
-					model = glm::mat4(1.0f);
-					model = glm::translate(model, t_orig);
-					model = glm::rotate(model, part_angle, glm::vec3(0.f, 1.0f, 0.f));
-
-
-					shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, lineOb.color);
-					Geometry::DrawVArrayLineStrip(trajectory);
-
-				}
-			}
+			DrawTrajectoryDemo();
 		}
 
 
@@ -386,8 +292,9 @@ namespace Hollow {
 
 
 
-		gui();
+		gui(window);
 
+		/*
 		if (ImGui::CollapsingHeader("Grammar"))
 		{
 			grammar.generate_graph(window);
@@ -402,7 +309,7 @@ namespace Hollow {
 				grammar.reset_graph();
 			}
 
-		}
+		}*/
 
 
 	}
@@ -486,7 +393,7 @@ namespace Hollow {
 
 	}
 
-	void StateBase::gui()
+	void StateBase::gui(GLFWwindow* window)
 	{
 
 
@@ -496,8 +403,9 @@ namespace Hollow {
 		ImGui::Separator();
 		ImGui::Text("FPS: %.2f", frameTime);
 		//ImGui::Checkbox("debug", &debugBool);
-		ImGui::Checkbox("Wireframe Mode", &wireFrameToggle);
+		//ImGui::Checkbox("Wireframe Mode", &wireFrameToggle);
 
+		/*
 		if (ImGui::CollapsingHeader("Graphics"))
 		{
 
@@ -510,19 +418,6 @@ namespace Hollow {
 
 		if (ImGui::CollapsingHeader("Physics"))
 		{
-			/*
-			//line 
-			float line_s[3] = { line_start.x, line_start.y, line_start.z };
-			ImGui::SliderFloat3("line start", line_s, -10, 10);
-			line_start.x = line_s[0];
-			line_start.y = line_s[1];
-			line_start.z = line_s[2];
-
-			float line_e[3] = { line_end.x, line_end.y, line_end.z };
-			ImGui::SliderFloat3("line end", line_e, -10, 10);
-			line_end.x = line_e[0];
-			line_end.y = line_e[1];
-			line_end.z = line_e[2];*/
 
 
 			//trajectory
@@ -553,25 +448,6 @@ namespace Hollow {
 			point_mag = glm::length(pr);
 			point_height = point_pos.y;
 
-			//ImGui::SliderFloat("point angle", &point_angle, -10, 10);
-			//ImGui::SliderFloat("point magnitude", &point_mag, 0.2f, 50.f);
-			//ImGui::SliderFloat("point height", &point_height, -50.f, 50.f);
-
-
-			//point_pos.x = point_mag * cosf(point_angle);
-			//point_pos.z = point_mag * sinf(point_angle);
-			//point_pos.y = point_height;
-
-			/*
-			ImGui::Checkbox("point in", &is_point_in);
-			if (is_point_in)
-			{
-				point_col = yes_col;
-			}
-			else
-			{
-				point_col = no_col;
-			}*/
 
 			ImGui::Checkbox("Show Trajectory Rotations", &show_rotations);
 			ImGui::SliderInt("number of rotations", &traj_its, 15, 100);
@@ -583,139 +459,15 @@ namespace Hollow {
 		//draw graphs
 		if (ImGui::CollapsingHeader("graphs"))
 		{
-			glm::vec2 pr(point_pos.x, point_pos.z);
-			point_mag = glm::length(pr);
-			float mag = glm::length(pr);
+			ShowGraphs();
+		}*/
 
-			ImGui::SliderFloat("Show calculation", &x_calc, 0, 100);
-			float r = 0;
+		ShowMainControls(window);
+		ShowDataCollectionControls();
+		ShowTrajectoryDemoControls();
 
-			if (ImGui::Button("show maths"))
-			{
-				float a = mag;
-				float b = point_pos.y;
-
-				float c = tanf(angle);
-
-				float d = gravity / (2 * velocity * velocity * cosf(angle) * cosf(angle));
-
-				float tx = x_calc; 
-				float ty = (tx * c) - (tx * tx * d);
-
-				float d2x = (powf(d, 2) * powf(tx, 4)) - (2 * c * d * powf(tx, 3)) + ((1 + c + (2 * b * d)) * powf(tx, 2)) + ((-2 * a - (2 * c * b)) * tx) + powf(a, 2) + powf(b, 2);
-				r = d2x;
-
-				float dpx = (4 * powf(d, 2) * powf(tx, 3)) - (6 * c * d * powf(tx, 2)) + ((2 + (2 * c) + (4 * b * d)) * tx) + ((-2 * a) - (2 * c * b));
-				//r = dpx; 
-
-
-				float cosa = cosf(angle);
-				float y = tx * (tanf(angle) - (tx * (gravity / (2 * velocity * velocity * cosa * cosa))));
-
-				std::cout << "point: (" << a << ", ";
-				std::cout << b << ")\n";
-				std::cout << "gravity: " << gravity << ", velocity: " << velocity << ", angle: " << angle;
-				std::cout << "c = " << c << ",  d = " << d;
-				std::cout << "\ntrajectory: (" << tx << ", " << ty << ")\n";
-				std::cout << "alt trajectory: (" << tx << ", " << y << ")\n";
-				std::cout << "dist sq: " << d2x << ", dist: " << sqrtf(d2x) << "\n";
-				glm::vec2 ta(tx, ty); glm::vec2 tb(a, b);
-				glm::vec2 tr = tb - ta;
-				std::cout << "calc distance: " << glm::length(tr);
-				std::cout << "\ngradient: " << dpx;
-				
-			}
-
-
-			//ImGui::SliderFloat("result: ", &r, -100, 100);
-
-			//fill graph data
-
-
-			x_points.clear();
-			y_points.clear();
-
-			for (int i = 0; i < 1000; i++)
-			{
-
-
-				float c = tanf(angle);
-
-				float d = gravity / (2 * velocity * velocity * cosf(angle) * cosf(angle));
-
-
-				traj_xs[i] = i * 0.1f;
-
-				//traj_ys[i] = traj_xs[i] * (tanf(angle) - (traj_xs[i] * (gravity / (2.f * velocity * velocity * cosf(angle) * cosf(angle)))));
-				traj_ys[i] = (traj_xs[i] * c) - (traj_xs[i] * traj_xs[i] * d);
-			
-				float tx = traj_xs[i];
-
-				float a = mag;
-				float b = point_pos.y;
-
-				dist_xs[i] = traj_xs[i];
-				dist_ys[i] = (powf(d, 2) * powf(tx, 4)) - (2 * c * d * powf(tx, 3)) + ((1 + powf(c, 2) + (2 * b * d)) * powf(tx, 2)) + ((-2 * a - (2 * c * b)) * tx) + powf(a, 2) + powf(b, 2);
-
-				dist_root_xs[i] = tx;
-				dist_root_ys[i] = sqrtf(dist_ys[i]);
-			
-				der_xs[i] = tx;
-				der_ys[i] = (4 * powf(d, 2) * powf(tx, 3)) - (6 * c * d * powf(tx, 2)) + ((1 + powf(c,2) + (2 * b * d)) * 2 * tx) + ((-2 * a) - (2 * c * b));
-
-				if (der_ys[i] >= -0.3f && der_ys[i] <= 0.3f)
-				{
-					//x_points.push_back(der_xs[i]);
-					//y_points.push_back(der_ys[i]);
-
-					x_points.push_back(der_xs[i]);
-					y_points.push_back(traj_ys[i]);
-
-					x_points.push_back(a);
-					y_points.push_back(b);
-
-
-				}
-
-				tan_xs[i] = tx;
-				tan_ys[i] = d;
-			
-			}
-
-
-
+		ShowExampleLevelControls();
 		
-
-
-			if (ImPlot::BeginPlot("Test Plot"))
-			{
-
-				ImPlot::PlotLine("Trajectory", traj_xs, traj_ys, 1000);
-
-				ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
-
-				ImPlot::PlotLine("Point", &mag, &point_pos.y, 1);
-
-				ImPlot::PlotLine("Distance Squared", dist_xs, dist_ys, 1000);
-				ImPlot::PlotLine("Distance", dist_root_xs, dist_root_ys, 1000);
-				//ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
-				ImPlot::PlotLine("Derivative of Distance Squared", der_xs, der_ys, 1000);
-
-				//ImPlot::SetNextLineStyle(ImPlotLineFlags_None)
-				ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
-				ImPlot::PlotLine("Closest Points", x_points.data(), y_points.data(), x_points.size(), ImPlotLineFlags_Segments);
-
-
-				ImPlot::PlotLine("tan(angle)", tan_xs, tan_ys, 1000);
-
-				ImPlot::EndPlot();
-			}
-			
-			
-
-
-		}
-
 
 	}
 
@@ -730,6 +482,7 @@ namespace Hollow {
 		glm::mat4 model = glm::mat4(1.0f);
 
 
+		phys.color_graph();
 
 		for (SpaceNode sn : phys.space_graph)
 		{
@@ -835,6 +588,484 @@ namespace Hollow {
 
 
 
+
+
+
+
+	}
+
+	void StateBase::DrawLevel()
+	{
+	}
+
+	void StateBase::DrawTrajectoryDemo()
+	{
+
+		//projection and view matrices
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1440.0f / 960.0f, 0.1f, 300.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		glm::mat4 model = glm::mat4(1.0f);
+
+
+		glm::vec3 t_orig = point_offset;
+		glm::vec3 t_point = point_offset + point_pos;
+
+
+
+		// draw line
+		model = glm::mat4(1.0f);
+		//model = glm::translate(model, t_orig);
+		//shaders.lineShader.UseShader(t_orig, t_point, model, view, projection, lineOb.color);
+		//Geometry::DrawVArrayLine(line);
+
+
+		//calculate angle between point and trajectory
+
+		point_angle = Physics::get_angle_between_vectors2(glm::vec2(1, 0), glm::vec2(t_point.x, t_point.z));
+
+
+		//draw trajectory
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, t_orig);
+		model = glm::rotate(model, point_angle, glm::vec3(0, 1, 0));
+		shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, point_col);
+		Geometry::DrawVArrayLineStrip(trajectory);
+
+
+
+		if (Physics::trajectory_test(velocity, gravity, angle, t_orig, t_point))
+		{
+			point_col = yes_col;
+		}
+		else
+		{
+			point_col = no_col;
+		}
+
+
+		//draw point
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, t_point);
+		model = glm::scale(model, lightCube.scale);
+
+		shaders.flatShader.UseShader(model, view, projection, plat_col);
+		Geometry::DrawVArray(cubeV);
+
+		//draw platform
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, t_orig);
+		model = glm::scale(model, lightCube.scale);
+
+		shaders.flatShader.UseShader(model, view, projection, plat_col);
+		Geometry::DrawVArray(cubeV);
+
+
+
+		//calculate closest point
+		/*
+		if (ImGui::Checkbox("Calculate Closest Point every frame", &calc_closest_point))
+		{
+			//closest_point_pos = Physics::get_closest_point(velocity, gravity, angle, line_start, point_pos);
+		}
+		if (ImGui::Button("Calculate Closest Point now") || calc_closest_point)
+		{
+		}*/
+		
+		closest_point_pos = Physics::get_closest_point(velocity, gravity, angle, t_orig, t_point);
+
+
+		//draw effective x
+		/*
+		glm::vec3 proj_point = point_pos - line_start;
+		proj_point.y = 0.f;
+
+		model = glm::mat4(1.0f);
+		shaders.lineShader.UseShader(line_start, proj_point, model, view, projection, lineOb.color);
+		Geometry::DrawVArrayLine(line);*/
+
+		//draw closest point
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, closest_point_pos);
+		model = glm::scale(model, lightCube.scale);
+
+		shaders.flatShader.UseShader(model, view, projection, lineOb.color);
+		Geometry::DrawVArray(cubeV);
+
+
+		model = glm::mat4(1.0f);
+		shaders.lineShader.UseShader(closest_point_pos, t_point, model, view, projection, lineOb.color);
+		Geometry::DrawVArrayLine(line);
+
+
+		//draw copy of trajectory rotated around platform
+
+
+		if (show_rotations)
+		{
+			for (int i = 1; i < traj_its; i++)
+			{
+
+				float full_angle = 2 * 3.14f;
+				float part_angle = point_angle + (full_angle / (float)traj_its) * i;
+
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, t_orig);
+				model = glm::rotate(model, part_angle, glm::vec3(0.f, 1.0f, 0.f));
+
+
+				shaders.trajShader.UseShader(gravity, angle, velocity, model, view, projection, lineOb.color);
+				Geometry::DrawVArrayLineStrip(trajectory);
+
+			}
+		}
+	}
+
+	void StateBase::ShowMainControls(GLFWwindow* window)
+	{
+
+		if (ImGui::Button("Generate New Level"))
+		{
+			//reset gameplay graph
+			grammar.reset_graph();
+
+			//perform all trasformations
+			grammar.GenerateWholeGraph(window);
+
+			//generate random game space
+			Graph gameplay_graph = grammar.get_output_graph();
+			phys.construct_graph(gameplay_graph);
+
+			//resolve all constraints
+			phys.resolve_all_constraints();
+
+		}
+
+		ImGui::Separator();
+
+		// Gameplay commands
+
+		if (ImGui::Button("Generate New Gameplay Graph"))
+		{
+			// reset gameplay graph
+			grammar.reset_graph();
+
+			//preform all transformations
+			grammar.GenerateWholeGraph(window);
+
+			// generate random game space
+			Graph gameplay_graph = grammar.get_output_graph();
+			phys.construct_graph(gameplay_graph);
+
+		}
+		if (ImGui::Button("Reset Gameplay Graph"))
+		{
+			//reset gameplay graph
+			grammar.reset_graph();
+
+			//generate random game space
+			Graph gameplay_graph = grammar.get_output_graph();
+			phys.construct_graph(gameplay_graph);
+
+		}
+		if (ImGui::Button("Do Single Graph Transformation"))
+		{
+			//perform single grammar tf
+			grammar.generate_graph(window);
+
+			// generate random game space
+			Graph gameplay_graph = grammar.get_output_graph();
+			phys.construct_graph(gameplay_graph);
+		}
+
+		ImGui::Separator();
+
+		// Game Space commands
+
+		if (ImGui::Button("Generate New Game Space"))
+		{
+			//generate random game space from grammar graph
+			Graph gameplay_graph = grammar.get_output_graph();
+			phys.construct_graph(gameplay_graph);
+
+			// resolve all constraints
+			phys.resolve_all_constraints();
+
+
+		}
+		if (ImGui::Button("Reset Game Space"))
+		{
+			//generate random game space from grammar graph
+			Graph gameplay_graph = grammar.get_output_graph();
+			phys.construct_graph(gameplay_graph);
+
+
+		}
+		if (ImGui::Button("Resolve All Constraints"))
+		{
+			//resolve a single constraint
+			phys.resolve_all_constraints();
+			phys.color_graph();
+
+		}
+		if (ImGui::Button("Do Single Constraint Resolution"))
+		{
+			//resolve a single constraint
+			phys.resolve_constraints();
+			phys.color_graph();
+
+		}
+
+		ImGui::SeparatorText("Display Settings");
+
+		ImGui::Checkbox("show lines", &show_lines);
+		ImGui::Checkbox("show constraints", &show_constraints);
+
+
+	}
+
+	void StateBase::ShowTrajectoryDemoControls()
+	{
+
+		if (ImGui::CollapsingHeader("Trajectory Demo"))
+		{
+
+			ImGui::Checkbox("Show Trajectory Demo", &show_process);
+
+			ImGui::Checkbox("Show Trajectory Rotations", &show_rotations);
+
+			ImGui::SeparatorText("Trajectory Parameters");
+
+			//trajectory
+			ImGui::SliderFloat("Velocity", &velocity, 5, 50);
+			ImGui::SliderFloat("Angle", &angle, 3.14f / -2.f, 3.14f / 2.f);
+			ImGui::SliderFloat("Gravity", &gravity, 5, 15);
+
+			ImGui::SeparatorText("Point Position");
+
+			float point[3] = { point_pos.x, point_pos.y, point_pos.z };
+			ImGui::SliderFloat("x", point, -50, 50);
+			ImGui::SliderFloat("y", &point[1], -150, 30);
+			ImGui::SliderFloat("z", &point[2], -50, 50);
+			point_pos.x = point[0];
+			point_pos.y = point[1];
+			point_pos.z = point[2];
+
+			ImGui::SeparatorText("Trajectory offset");
+
+			float off[3] = { point_offset.x, point_offset.y, point_offset.z };
+			ImGui::SliderFloat("offset x", off, 0, 50);
+			ImGui::SliderFloat("offset y", &off[1], -50, 20);
+			ImGui::SliderFloat("offset z", &off[2], -30, 30);
+			point_offset.x = off[0];
+			point_offset.y = off[1];
+			point_offset.z = off[2];
+
+			//angle, magnitude, height controls
+			point_angle = Physics::get_angle_between_vectors2(glm::vec2(1, 0), glm::vec2(point_pos.x, point_pos.z));
+			glm::vec2 pr(point_pos.x, point_pos.z);
+			point_mag = glm::length(pr);
+			point_height = point_pos.y;
+					
+
+			ShowGraphs();
+
+		}
+	}
+
+	void StateBase::ShowExampleLevelControls()
+	{
+		if (ImGui::CollapsingHeader("Other Game Space Controls"))
+		{
+
+			ImGui::Checkbox("update physics every frame", &physics_updates);
+			ImGui::Separator();
+
+			ImGui::SliderFloat("Generation Angle", &gen_angle, 0.f, 3.14f);
+			ImGui::SliderFloat("z-Axis Wobble", &z_offset, -50.f, 50.f);
+			ImGui::SliderFloat("Stretch Factor", &stretch, 10.f, 100.f);
+
+
+
+			if (ImGui::Button("Build Level From Grammar Graph"))
+			{
+				Graph gameplay_graph = grammar.get_output_graph();
+				phys.construct_graph(gameplay_graph);
+				//phys.color_graph();
+			}
+			if (ImGui::Button("Make Simple Level"))
+			{
+				glm::vec3 dir = glm::vec3(sinf(gen_angle), -cosf(gen_angle), 0.f);
+				phys.make_test_graph(dir, z_offset, stretch);
+				//phys.make_test_graph_branch(dir, z_offset, stretch);
+			}
+			if (ImGui::Button("Make Test Branch Level"))
+			{
+				glm::vec3 dir = glm::vec3(sinf(gen_angle), -cosf(gen_angle), 0.f);
+				//phys.make_test_graph(dir, z_offset, stretch);
+				phys.make_test_graph_branch(dir, z_offset, stretch);
+			}
+			if (ImGui::Button("Make Big Test Branch Level"))
+			{
+				glm::vec3 dir = glm::vec3(sinf(gen_angle), -cosf(gen_angle), 0.f);
+				//phys.make_test_graph(dir, z_offset, stretch);
+				phys.make_test_graph_big_branch(dir, z_offset, stretch);
+			}
+			if (ImGui::Button("Resolve a Single Constraint"))
+			{
+				phys.resolve_constraints();
+				phys.color_graph();
+			}
+		}
+	}
+
+	void StateBase::ShowDataCollectionControls()
+	{
+
+		if (ImGui::CollapsingHeader("Data Collection"))
+		{
+
+			if (ImGui::Button("Collect Data"))
+			{
+
+			}
+
+
+		}
+
+
+	}
+
+	void StateBase::ShowGraphs()
+	{
+
+		glm::vec2 pr(point_pos.x, point_pos.z);
+		point_mag = glm::length(pr);
+		float mag = glm::length(pr);
+
+		/*
+		//ImGui::SliderFloat("Show calculation", &x_calc, 0, 100);
+		float r = 0;
+
+		if (ImGui::Button("show maths"))
+		{
+			float a = mag;
+			float b = point_pos.y;
+
+			float c = tanf(angle);
+
+			float d = gravity / (2 * velocity * velocity * cosf(angle) * cosf(angle));
+
+			float tx = x_calc;
+			float ty = (tx * c) - (tx * tx * d);
+
+			float d2x = (powf(d, 2) * powf(tx, 4)) - (2 * c * d * powf(tx, 3)) + ((1 + c + (2 * b * d)) * powf(tx, 2)) + ((-2 * a - (2 * c * b)) * tx) + powf(a, 2) + powf(b, 2);
+			r = d2x;
+
+			float dpx = (4 * powf(d, 2) * powf(tx, 3)) - (6 * c * d * powf(tx, 2)) + ((2 + (2 * c) + (4 * b * d)) * tx) + ((-2 * a) - (2 * c * b));
+			//r = dpx; 
+
+
+			float cosa = cosf(angle);
+			float y = tx * (tanf(angle) - (tx * (gravity / (2 * velocity * velocity * cosa * cosa))));
+
+			std::cout << "point: (" << a << ", ";
+			std::cout << b << ")\n";
+			std::cout << "gravity: " << gravity << ", velocity: " << velocity << ", angle: " << angle;
+			std::cout << "c = " << c << ",  d = " << d;
+			std::cout << "\ntrajectory: (" << tx << ", " << ty << ")\n";
+			std::cout << "alt trajectory: (" << tx << ", " << y << ")\n";
+			std::cout << "dist sq: " << d2x << ", dist: " << sqrtf(d2x) << "\n";
+			glm::vec2 ta(tx, ty); glm::vec2 tb(a, b);
+			glm::vec2 tr = tb - ta;
+			std::cout << "calc distance: " << glm::length(tr);
+			std::cout << "\ngradient: " << dpx;
+
+		}*/
+
+
+		//ImGui::SliderFloat("result: ", &r, -100, 100);
+
+		//fill graph data
+
+
+		x_points.clear();
+		y_points.clear();
+
+		for (int i = 0; i < 1000; i++)
+		{
+
+
+			float c = tanf(angle);
+
+			float d = gravity / (2 * velocity * velocity * cosf(angle) * cosf(angle));
+
+
+			traj_xs[i] = i * 0.1f;
+
+			//traj_ys[i] = traj_xs[i] * (tanf(angle) - (traj_xs[i] * (gravity / (2.f * velocity * velocity * cosf(angle) * cosf(angle)))));
+			traj_ys[i] = (traj_xs[i] * c) - (traj_xs[i] * traj_xs[i] * d);
+
+			float tx = traj_xs[i];
+
+			float a = mag;
+			float b = point_pos.y;
+
+			dist_xs[i] = traj_xs[i];
+			dist_ys[i] = (powf(d, 2) * powf(tx, 4)) - (2 * c * d * powf(tx, 3)) + ((1 + powf(c, 2) + (2 * b * d)) * powf(tx, 2)) + ((-2 * a - (2 * c * b)) * tx) + powf(a, 2) + powf(b, 2);
+
+			dist_root_xs[i] = tx;
+			dist_root_ys[i] = sqrtf(dist_ys[i]);
+
+			der_xs[i] = tx;
+			der_ys[i] = (4 * powf(d, 2) * powf(tx, 3)) - (6 * c * d * powf(tx, 2)) + ((1 + powf(c, 2) + (2 * b * d)) * 2 * tx) + ((-2 * a) - (2 * c * b));
+
+			if (der_ys[i] >= -0.3f && der_ys[i] <= 0.3f)
+			{
+				//x_points.push_back(der_xs[i]);
+				//y_points.push_back(der_ys[i]);
+
+				x_points.push_back(der_xs[i]);
+				y_points.push_back(traj_ys[i]);
+
+				x_points.push_back(a);
+				y_points.push_back(b);
+
+
+			}
+
+			tan_xs[i] = tx;
+			tan_ys[i] = d;
+
+		}
+
+
+
+
+
+
+		if (ImPlot::BeginPlot("Test Plot"))
+		{
+
+			ImPlot::PlotLine("Trajectory", traj_xs, traj_ys, 1000);
+
+			ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+
+			ImPlot::PlotLine("Point", &mag, &point_pos.y, 1);
+
+			ImPlot::PlotLine("Distance Squared", dist_xs, dist_ys, 1000);
+			ImPlot::PlotLine("Distance", dist_root_xs, dist_root_ys, 1000);
+			//ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+			ImPlot::PlotLine("Derivative of Distance Squared", der_xs, der_ys, 1000);
+
+			//ImPlot::SetNextLineStyle(ImPlotLineFlags_None)
+			ImPlot::SetNextMarkerStyle(ImPlotMarker_Circle);
+			ImPlot::PlotLine("Closest Points", x_points.data(), y_points.data(), x_points.size(), ImPlotLineFlags_Segments);
+
+
+			ImPlot::PlotLine("tan(angle)", tan_xs, tan_ys, 1000);
+
+			ImPlot::EndPlot();
+		}
 
 
 
