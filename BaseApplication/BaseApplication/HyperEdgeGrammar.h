@@ -128,6 +128,10 @@ public:
 
 	static std::string text_from_label(HyperedgeLabel in_label);
 
+
+
+
+
 };
 
 
@@ -145,6 +149,9 @@ private:
 	bool is_external_node(std::string name);
 
 public:
+
+	void clear_graph();
+
 	bool do_hyperedges_remain();
 
 	Hyperedge* select_hyperedge_to_replace();
@@ -174,6 +181,9 @@ public:
 
 	void output_dot(GLFWwindow* window);
 
+	std::map<std::string, Node>& get_nodes() { return nodes; };
+	std::map<std::string, Edge>& get_edges() { return edges; };
+	std::map<std::string, Hyperedge>& get_hyperedges() { return hyperedges; };
 };
 
 

@@ -90,6 +90,10 @@ namespace Hollow {
 		point_col = glm::vec3(1.f, 1.f, 1.f);
 
 		plat_col = glm::vec3(1.f, 0.58f, 0.04f);
+		//start_col = glm::vec3(0.98f, 0.96f, 0.19f);
+		start_col = glm::vec3(0.6f, 0.79f, 0.24f);
+		end_col = glm::vec3(0.98f, 0.17f, 0.2f);
+		hyper_col = glm::vec3(0.28f, 0.62f, 0.81f);
 
 		closest_point_pos = line_start;
 		point_offset = line_start;
@@ -173,11 +177,20 @@ namespace Hollow {
 
 		ImGui::Checkbox("show process", &show_process);
 		ImGui::Checkbox("show lines", &show_lines);
+		if (ImGui::Checkbox("show constraints", &show_constraints))
+		{
+
+			phys.color_graph();
+
+		}
 		ImGui::Checkbox("update physics every frame", &physics_updates);
+
+		ImGui::SliderFloat("particle speed", &speed, 0.f, 10.f);
 
 		if (physics_updates)
 		{
-			phys.update(dt);
+			//phys.update(dt);
+			phys.particle_update(speed, dt);
 		}
 
 		if (show_process)
@@ -190,10 +203,29 @@ namespace Hollow {
 
 
 
+			if (ImGui::Button("build level from grammar graph"))
+			{
+				Graph gameplay_graph = grammar.get_output_graph();
+				phys.construct_graph(gameplay_graph);
+				//phys.color_graph();
+			}
 			if (ImGui::Button("make level"))
 			{
 				glm::vec3 dir = glm::vec3(sinf(gen_angle), -cosf(gen_angle), 0.f);
 				phys.make_test_graph(dir, z_offset, stretch);
+				//phys.make_test_graph_branch(dir, z_offset, stretch);
+			}
+			if (ImGui::Button("make branch level"))
+			{
+				glm::vec3 dir = glm::vec3(sinf(gen_angle), -cosf(gen_angle), 0.f);
+				//phys.make_test_graph(dir, z_offset, stretch);
+				phys.make_test_graph_branch(dir, z_offset, stretch);
+			}
+			if (ImGui::Button("make big branch level"))
+			{
+				glm::vec3 dir = glm::vec3(sinf(gen_angle), -cosf(gen_angle), 0.f);
+				//phys.make_test_graph(dir, z_offset, stretch);
+				phys.make_test_graph_big_branch(dir, z_offset, stretch);
 			}
 			if (ImGui::Button("resolve constraints"))
 			{
@@ -246,8 +278,8 @@ namespace Hollow {
 			// draw line
 			model = glm::mat4(1.0f);
 			//model = glm::translate(model, t_orig);
-			shaders.lineShader.UseShader(t_orig, t_point, model, view, projection, lineOb.color);
-			Geometry::DrawVArrayLine(line);
+			//shaders.lineShader.UseShader(t_orig, t_point, model, view, projection, lineOb.color);
+			//Geometry::DrawVArrayLine(line);
 
 
 			//calculate angle between point and trajectory
@@ -495,7 +527,7 @@ namespace Hollow {
 
 			//trajectory
 			ImGui::SliderFloat("velocity", &velocity, 5, 50);
-			ImGui::SliderFloat("angle", &angle, 0, 3.14f / 2.f);
+			ImGui::SliderFloat("angle", &angle, 3.14f / -2.f, 3.14f / 2.f);
 			ImGui::SliderFloat("gravity", &gravity, 5, 15);
 
 
@@ -702,6 +734,20 @@ namespace Hollow {
 		for (SpaceNode sn : phys.space_graph)
 		{
 
+			if (sn.name == "start")
+			{
+				sn.color = start_col;
+			}
+			if (sn.name == "end")
+			{
+				sn.color = end_col;
+			}
+			if (sn.is_hyper)
+			{
+				sn.color = hyper_col;
+			}
+
+
 			//draw platform
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, sn.position);
@@ -716,12 +762,23 @@ namespace Hollow {
 			{
 				for (Constraint& c : sn.constraints)
 				{
+					glm::vec3 line_col = glm::vec3(1.f, 1.f, 1.f);
+					
+					if (c.is_hyper)
+					{
+						line_col = hyper_col;
+					}
+
 					if (show_lines)
 					{
 						// draw line
 						model = glm::mat4(1.0f);
-						shaders.lineShader.UseShader(sn.position, phys.space_graph[c.index].position, model, view, projection, lineOb.color);
+						shaders.lineShader.UseShader(sn.position, phys.space_graph[c.index].position, model, view, projection, line_col);
 						Geometry::DrawVArrayLine(line);
+					}
+					if (show_constraints && !c.is_hyper)
+					{
+
 
 						glm::vec3 t_col = yes_col;
 

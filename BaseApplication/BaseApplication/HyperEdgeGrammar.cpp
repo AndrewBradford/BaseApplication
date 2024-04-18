@@ -286,6 +286,16 @@ std::string Hyperedge::text_from_label(HyperedgeLabel in_label)
 
 // ------ GRAPH FUNCTIONS ------------
 
+void Graph::clear_graph()
+{
+	
+	nodes.clear();
+	edges.clear();
+	hyperedges.clear();
+	external_nodes.clear();
+
+}
+
 bool Graph::do_hyperedges_remain()
 {
 	return !hyperedges.empty();
@@ -598,7 +608,7 @@ void HyperEdgeGrammar::make_rules()
 	}
 	{
 
-		Production move_2(HyperedgeLabel::MOVE, 1);
+		Production move_2(HyperedgeLabel::MOVE, 2);
 		
 		Node ns[3];
 		ns[0].set_name("n0");
@@ -650,7 +660,7 @@ void HyperEdgeGrammar::make_rules()
 
 	}
 	{
-		Production move_4(HyperedgeLabel::MOVE, 1);
+		Production move_4(HyperedgeLabel::MOVE, 2);
 
 
 		Node ns[3];
@@ -708,7 +718,7 @@ void HyperEdgeGrammar::make_rules()
 	}
 	{
 
-		Production air_2(HyperedgeLabel::IN_AIR, 1);
+		Production air_2(HyperedgeLabel::IN_AIR, 2);
 
 		Node ns[3];
 		ns[0].set_name("n0");
@@ -761,7 +771,7 @@ void HyperEdgeGrammar::make_rules()
 	}
 	{
 
-		Production air_4(HyperedgeLabel::IN_AIR, 1);
+		Production air_4(HyperedgeLabel::IN_AIR, 2);
 
 		Node ns[3];
 		ns[0].set_name("n0");
@@ -819,7 +829,7 @@ void HyperEdgeGrammar::make_rules()
 	}
 	{
 
-		Production kick_2(HyperedgeLabel::KICKING, 1);
+		Production kick_2(HyperedgeLabel::KICKING, 2);
 
 		Node ns[3];
 		ns[0].set_name("n0");
@@ -872,7 +882,7 @@ void HyperEdgeGrammar::make_rules()
 	}
 	{
 
-		Production kick_4(HyperedgeLabel::KICKING, 1);
+		Production kick_4(HyperedgeLabel::KICKING, 2);
 
 		Node ns[3];
 		ns[0].set_name("n0");
@@ -931,7 +941,7 @@ void HyperEdgeGrammar::make_rules()
 	}
 	{
 
-		Production dive_2(HyperedgeLabel::DIVING, 1);
+		Production dive_2(HyperedgeLabel::DIVING, 2);
 
 		Node ns[3];
 		ns[0].set_name("n0");
@@ -984,7 +994,7 @@ void HyperEdgeGrammar::make_rules()
 	}
 	{
 
-		Production dive_4(HyperedgeLabel::DIVING, 1);
+		Production dive_4(HyperedgeLabel::DIVING, 2);
 
 		Node ns[3];
 		ns[0].set_name("n0");
@@ -1022,6 +1032,7 @@ void HyperEdgeGrammar::make_rules()
 
 void HyperEdgeGrammar::reset_graph()
 {
+	level_graph.clear_graph();
 	make_starting_graph();
 	replacement_count = 0;
 }

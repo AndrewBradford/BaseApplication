@@ -105,11 +105,17 @@ namespace Hollow {
 
 		glm::vec3 point_col;
 		glm::vec3 plat_col;
+		glm::vec3 start_col;
+		glm::vec3 end_col;
+		glm::vec3 hyper_col;
 
 		bool calc_closest_point = false;
 
 		bool show_lines = true;
+		bool show_constraints = true;
 		bool physics_updates = false;
+
+		float speed = 1.5f;
 
 		bool show_rotations = false;
 		int traj_its = 10;

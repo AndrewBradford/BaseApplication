@@ -7,7 +7,7 @@
 #include <string>
 
 #include "HyperEdgeGrammar.h"
-
+#include <ctime>
 
 
 struct TrajectoryInfo {
@@ -24,7 +24,8 @@ struct Constraint {
 
 	bool is_satisfied = false;
 	//bool is_solid = true;
-	glm::vec3 color;
+	glm::vec3 color = glm::vec3(1.f, 1.f, 1.f);
+	bool is_hyper = false;
 
 };
 
@@ -34,9 +35,14 @@ struct SpaceNode {
 	glm::vec3 position;
 	std::vector<Constraint> constraints;
 
+
+	glm::vec3 velocity = glm::vec3(0.f, 0.f, 0.f);
+	
+	bool is_hyper = false;
+
 	bool is_solid = true;
 
-	glm::vec3 color;
+	glm::vec3 color = glm::vec3(1.f, 1.f, 1.f);
 };
 
 class Physics
@@ -156,11 +162,19 @@ public:
 		return get_closest_point(t.velocity, t.gravity, t.angle, origin, point);
 	}
 
+	glm::vec3 get_closest_crossover_point(TrajectoryInfo t1, TrajectoryInfo t2, glm::vec3 origin, glm::vec3 point1, glm::vec3 point2)
+	{
+		glm::vec3 sol = glm::vec3(0, 0, 0);
+
+		return sol;
+	}
 
 	Physics()
 	{
 		build_constraint_map();
-		make_test_graph(glm::vec3(1, 0, 0), 0.f, 50.f);
+		//make_test_graph(glm::vec3(1, 0, 0), 0.f, 50.f);
+		make_test_graph_branch(glm::vec3(1, 0, 0), 0.f, 50.f);
+		std::srand(std::time(0));
 	}
 
 	~Physics()
@@ -197,6 +211,7 @@ public:
 		sn.position = dir;
 		sn.position *= node * dist;
 		sn.position.z = z_offset;
+		sn.position = random_pos();
 		sn.is_solid = true;
 		sn.constraints.clear();
 
@@ -234,6 +249,7 @@ public:
 		sn.position = dir;
 		sn.position *= node * dist;
 		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
 		sn.is_solid = true;
 		sn.constraints.clear();
 
@@ -256,6 +272,7 @@ public:
 		sn.name = "end";
 		sn.position = dir;
 		sn.position *= node * dist;
+		sn.position = random_pos();
 		sn.is_solid = true;
 		sn.constraints.clear();
 				
@@ -264,6 +281,373 @@ public:
 		sn.constraints.push_back(c);
 
 		space_graph.push_back(sn);
+
+
+		color_graph();
+
+	}
+
+	void make_test_graph_branch(glm::vec3 dir, float z_offset, float stretch)
+	{
+
+		space_graph.clear();
+
+		int node = 0;
+
+		Constraint c;
+		float dist = 50.f;
+		dist = stretch;
+
+		// start, 0
+		SpaceNode sn;
+		sn.name = "start";
+		sn.position = glm::vec3(0, 0, 0);
+		sn.color = glm::vec3(1.f, 0.58f, 0.04f);
+		sn.is_solid = true;
+
+
+		space_graph.push_back(sn);
+
+		node++;
+
+		// 1
+		sn.name = "first mid";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 0;
+		c.t_info = constraint_map[EdgeLabel::dive_spring];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+
+		//node++;
+
+
+		//2
+		sn.name = "branch mid";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 0;
+		c.t_info = constraint_map[EdgeLabel::long_jump];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+
+		node++;
+
+		// 3
+		sn.name = "mid";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 1;
+		c.t_info = constraint_map[EdgeLabel::dive];
+		sn.constraints.push_back(c);
+
+		
+		c.index = 2;
+		c.t_info = constraint_map[EdgeLabel::dive_spring];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+
+		node++;
+
+		// end, 4
+
+		sn.name = "end";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 3;
+		c.t_info = constraint_map[EdgeLabel::long_jump];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+
+		color_graph();
+
+	}
+
+	void make_test_graph_big_branch(glm::vec3 dir, float z_offset, float stretch)
+	{
+
+		space_graph.clear();
+
+		int node = 0;
+
+		Constraint c;
+		float dist = 50.f;
+		dist = stretch;
+
+		// start, 0
+		SpaceNode sn;
+		sn.name = "start";
+		sn.position = glm::vec3(0, 0, 0);
+		sn.color = glm::vec3(1.f, 0.58f, 0.04f);
+		sn.is_solid = true;
+
+
+		space_graph.push_back(sn);
+
+		node++;
+
+		// 1
+		sn.name = "first mid";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 0;
+		c.t_info = constraint_map[EdgeLabel::dive_spring];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+
+		//node++;
+
+
+		//2
+		sn.name = "branch mid";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 0;
+		c.t_info = constraint_map[EdgeLabel::long_jump];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+
+		node++;
+
+		// 3
+		sn.name = "mid";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 1;
+		c.t_info = constraint_map[EdgeLabel::jump];
+		sn.constraints.push_back(c);
+
+
+		c.index = 2;
+		c.t_info = constraint_map[EdgeLabel::dive_spring];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+
+		node++;
+
+		// end, 4
+
+		sn.name = "end";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 3;
+		c.t_info = constraint_map[EdgeLabel::long_jump];
+		sn.constraints.push_back(c);
+
+		c.index = 9;
+		c.t_info = constraint_map[EdgeLabel::jump];
+		sn.constraints.push_back(c);
+
+		c.index = 12;
+		c.t_info = constraint_map[EdgeLabel::long_jump];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+
+		node++;
+
+		// 5
+
+		sn.name = "other";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 2;
+		c.t_info = constraint_map[EdgeLabel::jump];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+		node++;
+
+		// 6
+
+		sn.name = "other";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 0;
+		c.t_info = constraint_map[EdgeLabel::dive_spring];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+		node++;
+
+		// 7
+
+		sn.name = "other";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 6;
+		c.t_info = constraint_map[EdgeLabel::jump];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+		node++;
+
+		// 8
+
+		sn.name = "other";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 7;
+		c.t_info = constraint_map[EdgeLabel::jump];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+		node++;
+
+		// 9
+
+		sn.name = "other";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 8;
+		c.t_info = constraint_map[EdgeLabel::jump];
+		sn.constraints.push_back(c);
+
+		c.index = 5;
+		c.t_info = constraint_map[EdgeLabel::dive_spring];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+		node++;
+
+		// 10
+
+		sn.name = "other";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 3;
+		c.t_info = constraint_map[EdgeLabel::long_jump];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+		node++;
+
+		// 11
+
+		sn.name = "other";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 10;
+		c.t_info = constraint_map[EdgeLabel::jump];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+		node++;
+
+		// 12
+
+		sn.name = "other";
+		sn.position = dir;
+		sn.position *= node * dist;
+		sn.position.z = -1.f * z_offset;
+		sn.position = random_pos();
+		sn.is_solid = true;
+		sn.constraints.clear();
+
+		c.index = 10;
+		c.t_info = constraint_map[EdgeLabel::long_jump];
+		sn.constraints.push_back(c);
+
+		space_graph.push_back(sn);
+
+		node++;
+
+
 
 
 		color_graph();
@@ -348,18 +732,115 @@ public:
 
 	}
 
-	void construct_graph(Graph* graph, glm::vec3 dir)
+	void construct_graph(Graph& graph)
 	{
 		// step through the graph and add each gameplay node to space graph
 
-		Node* current_node = graph->get_external_node(0);
+
+		space_graph.clear();
+
+		// add each node to space graph
+
+		auto nodes = graph.get_nodes();
 
 		SpaceNode sn;
-		sn.name = current_node->get_name();
-		sn.position = glm::vec3(0, 0, 0);
+		for (auto node : nodes)
+		{
 
-		
+			sn.name = node.second.get_name();
+			sn.position = random_pos();
+			sn.is_hyper = false;
 
+			space_graph.push_back(sn);
+		}
+
+		auto hyperedges = graph.get_hyperedges();
+
+		for (auto hyperedge : hyperedges)
+		{
+			sn.name = hyperedge.second.get_name();
+			sn.position = random_pos();
+			sn.is_hyper = true;
+			space_graph.push_back(sn);
+		}
+
+		// add each edge connection to space graph node constraints
+
+		auto edges = graph.get_edges();
+
+		for (auto edge : edges)
+		{
+			int source = -1;
+			int target = -1;
+
+			//find source and target nodes
+			for (int i = 0; i < space_graph.size(); i++)
+			{
+				if (space_graph[i].name == edge.second.get_source())
+				{
+					source = i;
+				}
+				if (space_graph[i].name == edge.second.get_target())
+				{
+					target = i;
+				}
+			}
+			if (source == -1 || target == -1)
+			{
+				continue;
+			}
+
+			//add constraint to target node
+			Constraint c;
+			c.t_info = constraint_map[edge.second.get_label()];
+			c.index = source;
+
+			space_graph[target].constraints.push_back(c);
+
+		}
+
+		//add each hyper edge connection to space graph node constraints
+
+		for (auto hyperedge : hyperedges)
+		{
+
+			std::vector<int> targets;
+			int source = -1;
+
+			//find source and target nodes
+			for (int i = 0; i < space_graph.size(); i++)
+			{
+				//find hyperedge
+				if (space_graph[i].name == hyperedge.second.get_name())
+				{
+					source = i;
+				}
+				//find each connected node
+				for (auto node : hyperedge.second.get_attachment_nodes())
+				{
+					if (space_graph[i].name == node)
+					{
+						targets.push_back(i);
+					}
+				}
+			}
+			if (source == -1 || targets.size() == 0)
+			{
+				continue;
+			}
+
+			//add constraint to target nodes
+			Constraint c;
+
+			for (int t : targets)
+			{
+				c.t_info = constraint_map[EdgeLabel::jump];
+				c.index = source;
+				c.is_hyper = true;
+
+				space_graph[t].constraints.push_back(c);
+			}
+		}
 
 
 	}
@@ -377,19 +858,116 @@ public:
 		el = EdgeLabel::dive_spring;
 		constraint_map[el] = t;
 
+		el = EdgeLabel::backflip;
+		constraint_map[el] = t;
+
 		t.velocity = 15.f;
 		t.angle = 3.14f / 8.f;
 		el = EdgeLabel::long_jump;
 		constraint_map[el] = t;
 
+		el = EdgeLabel::kick;
+		constraint_map[el] = t;
+
+		el = EdgeLabel::deflect;
+		constraint_map[el] = t;
+
+
+		t.velocity = 10.f;
+		t.angle = -1.3f;
+		el = EdgeLabel::dive;
+		constraint_map[el] = t;
+
+
 		
 
 	}
 
-	float speed = 0.5f;
+	glm::vec3 random_pos()
+	{
+
+		float x = ((rand() % 1000) * 0.05f) - 25.f;
+		float y = ((rand() % 1000) * 0.05f) - 25.f;
+		float z = ((rand() % 1000) * 0.05f) - 25.f;
+
+
+		return glm::vec3(x, y, z);
+
+	}
+
+	float speed = 1.5f;
+
+
+	float repulsion_dist = 5.0f;
+	float attraction_dist = 6.0f;
+
+	void particle_update(float speed, float dt)
+	{
+		// for each particle
+		for (int i = 0; i < space_graph.size(); i++)
+		{
+			space_graph[i].velocity = glm::vec3(0, 0, 0);
+			//check distance from each other particle
+			for (int j = 0; j < space_graph.size(); j++)
+			{
+				if (i == j) { continue; }
+
+				float dist = glm::distance(space_graph[i].position, space_graph[j].position);
+
+				//check if particle is within repulsion distance
+				if (dist < repulsion_dist)
+				{
+					//apply velocity away from other particle
+					space_graph[i].velocity += glm::normalize(space_graph[i].position - space_graph[j].position);
+
+				}
+
+				bool connected = false;
+
+				//check if particle is connected 
+				for (Constraint c : space_graph[i].constraints)
+				{
+					if (c.index == j)
+					{
+						connected = true;
+					}
+
+				}
+				for (Constraint c : space_graph[j].constraints)
+				{
+
+					if (c.index == i)
+					{
+						//connected = true;
+					}
+
+
+				}
+
+				if (connected && (dist > attraction_dist))
+				{
+					//apply velocity towards other particle
+					space_graph[i].velocity += glm::normalize(space_graph[j].position - space_graph[i].position);
+				}
+
+
+			}
+
+
+			//space_graph[i].position += speed * glm::normalize(space_graph[i].velocity) * dt;
+			space_graph[i].position += speed * space_graph[i].velocity * dt;
+		}
+		
+
+	}
+
 
 	void update(float dt)
 	{
+
+
+
+
 		for (int i = 0; i < space_graph.size(); i++)
 		{
 			if (space_graph[i].constraints.size() > 0)
@@ -425,10 +1003,6 @@ public:
 		}
 		color_graph();
 
-
-
-
-
 	}
 
 
@@ -439,5 +1013,6 @@ private:
 
 	glm::vec3 yes_col = glm::vec3(0.f, 0.7f, 0.3f);
 	glm::vec3 no_col = glm::vec3(0.86f, 0.1f, 0.13f);
+
 
 };
