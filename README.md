@@ -17,7 +17,7 @@ Uses OpenGl for graphics rendering, ImGui for user interface and GLFW for window
 
 ## Code Overview
 
-### Most Relevant Classes
+### Main Classes
 
 
 #### StateBase [.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/StateBase.h) / [.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/StateBase.cpp)
@@ -42,13 +42,9 @@ Contains all data and code related to game space generation.
 
 Sets up OpenGL (rendering), ImGui (UI), GLFW (window and input), and StateBase.
 
-#### Shader [.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Shader.h) / [.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Shader.cpp)
+#### Shader [.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Shader.h) / [.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Shader.cpp) / [Folder](https://github.com/AndrewBradford/BaseApplication/tree/master/BaseApplication/BaseApplication/shaders)
 
-Loads and activates shaders.
-
-#### [Shader Folder](https://github.com/AndrewBradford/BaseApplication/tree/master/BaseApplication/BaseApplication/shaders)
-
-Location of various vertex and fragment shaders used to render objects.
+Loads and activates various vertex and fragment shaders used to render objects.
 
 #### Geometry [.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Geometry.h) / [.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Geometry.cpp)
 
