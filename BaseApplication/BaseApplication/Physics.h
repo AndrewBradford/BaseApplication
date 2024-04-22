@@ -50,7 +50,8 @@ class Physics
 
 public:
 
-	static bool trajectory_test(float velocity, float gravity, float angle, glm::vec3 origin, glm::vec3 point)
+	static bool trajectory_test(float velocity, float gravity, float angle, glm::vec3 origin, glm::vec3 point);
+	/*
 	{
 		// calculate distance vector and project onto xz plane
 		glm::vec3 proj = point - origin;
@@ -73,38 +74,43 @@ public:
 		}
 
 
-	}
+	}*/
 
-	static bool trajectory_test(TrajectoryInfo t, glm::vec3 origin, glm::vec3 point)
+	static bool trajectory_test(TrajectoryInfo t, glm::vec3 origin, glm::vec3 point);
+	/*
 	{
 		return trajectory_test(t.velocity, t.gravity, t.angle, origin, point);
-	}
+	}*/
 
 
-	static float get_angle_between_vectors2(glm::vec2 a, glm::vec2 b)
+	static float get_angle_between_vectors2(glm::vec2 a, glm::vec2 b);
+	/*
 	{
 		float c = -1;
 		if (b.y < 0) { c = 1; }
 		return c * acosf(glm::dot(a, b) / (glm::length(a) * glm::length(b)));
 
-	}
+	}*/
 
 
-	static float get_y_at_x(float velocity, float gravity, float angle, float x)
+	static float get_y_at_x(float velocity, float gravity, float angle, float x);
+	/*
 	{
 
 		float cosa = cosf(angle);
 		return x * (tanf(angle) - (x * (gravity / (2 * velocity * velocity * cosa * cosa))));
 
-	}
+	}*/
 
-	static float get_y_at_x(TrajectoryInfo t, float x)
+	static float get_y_at_x(TrajectoryInfo t, float x);
+	/*
 	{
 		return get_y_at_x(t.velocity, t.gravity, t.angle, x);
-	}
+	}*/
 
 
-	static glm::vec3 get_closest_point(float velocity, float gravity, float angle, glm::vec3 origin, glm::vec3 point)
+	static glm::vec3 get_closest_point(float velocity, float gravity, float angle, glm::vec3 origin, glm::vec3 point);
+	/*
 	{
 
 
@@ -155,36 +161,40 @@ public:
 
 
 
-	}
+	}*/
 
-	glm::vec3 get_closest_point(TrajectoryInfo t, glm::vec3 origin, glm::vec3 point)
+	glm::vec3 get_closest_point(TrajectoryInfo t, glm::vec3 origin, glm::vec3 point);
+	/*
 	{
 		return get_closest_point(t.velocity, t.gravity, t.angle, origin, point);
-	}
+	}*/
 
-	glm::vec3 get_closest_crossover_point(TrajectoryInfo t1, TrajectoryInfo t2, glm::vec3 origin, glm::vec3 point1, glm::vec3 point2)
+	glm::vec3 get_closest_crossover_point(TrajectoryInfo t1, TrajectoryInfo t2, glm::vec3 origin, glm::vec3 point1, glm::vec3 point2);
+	/*
 	{
 		glm::vec3 sol = glm::vec3(0, 0, 0);
 
 		return sol;
-	}
+	}*/
 
-	Physics()
+	Physics();
+	/*
 	{
 		build_constraint_map();
 		make_test_graph(glm::vec3(1, 0, 0), 0.f, 50.f);
 		//make_test_graph_branch(glm::vec3(1, 0, 0), 0.f, 50.f);
 		std::srand(std::time(0));
-	}
+	}*/
 
-	~Physics()
+	~Physics();
+	/*
 	{
 
-	}
+	}*/
 
-	//void add_Node(Constraint c, int )
 
-	void make_test_graph(glm::vec3 dir, float z_offset, float stretch)
+	void make_test_graph(glm::vec3 dir, float z_offset, float stretch);
+	/*
 	{
 
 		space_graph.clear();
@@ -226,23 +236,6 @@ public:
 		node++;
 
 
-		/*
-		sn.name = "branch mid";
-		sn.position = dir;
-		sn.position *= node * dist;
-		sn.position.z = z_offset;
-		sn.is_solid = true;
-		sn.constraints.clear();
-
-		//Constraint c;
-		c.index = 1;
-		c.t_info = constraint_map[EdgeLabel::long_jump];
-		sn.constraints.push_back(c);
-
-		//space_graph.push_back(sn);
-
-
-		node++;*/
 
 		// 2
 		sn.name = "mid";
@@ -257,10 +250,6 @@ public:
 		c.t_info = constraint_map[EdgeLabel::jump];
 		sn.constraints.push_back(c);
 
-		/*
-		c.index = 2;
-		c.t_info = constraint_map[EdgeLabel::dive_spring];
-		sn.constraints.push_back(c);*/
 
 		space_graph.push_back(sn);
 
@@ -285,9 +274,10 @@ public:
 
 		color_graph();
 
-	}
+	}*/
 
-	void make_test_graph_branch(glm::vec3 dir, float z_offset, float stretch)
+	void make_test_graph_branch(glm::vec3 dir, float z_offset, float stretch);
+	/*
 	{
 
 		space_graph.clear();
@@ -388,9 +378,10 @@ public:
 
 		color_graph();
 
-	}
+	}*/
 
-	void make_test_graph_big_branch(glm::vec3 dir, float z_offset, float stretch)
+	void make_test_graph_big_branch(glm::vec3 dir, float z_offset, float stretch);
+	/*
 	{
 
 		space_graph.clear();
@@ -652,9 +643,10 @@ public:
 
 		color_graph();
 
-	}
+	}*/
 
-	void color_graph()
+void color_graph();
+/*
 	{
 
 
@@ -683,9 +675,10 @@ public:
 
 
 
-	}
+	}*/
 
-	glm::vec3 overshoot(glm::vec3 a, glm::vec3 b, float amnt)
+glm::vec3 overshoot(glm::vec3 a, glm::vec3 b, float amnt);
+/*
 	{
 
 		glm::vec3 dir = b - a;
@@ -694,9 +687,10 @@ public:
 		return over_dir;
 
 
-	}
+	}*/
 
-	bool constraints_resolved()
+bool constraints_resolved();
+/*
 	{
 		for (int i = 0; i < space_graph.size(); i++)
 		{
@@ -723,9 +717,10 @@ public:
 			}
 		}
 		return true;
-	}
+	}*/
 
-	void resolve_constraints()
+void resolve_constraints();
+/*
 	{
 
 		for (int i = 0; i < space_graph.size(); i++)
@@ -759,9 +754,10 @@ public:
 		}
 		color_graph();
 
-	}
+	}*/
 
-	void resolve_all_constraints()
+void resolve_all_constraints();
+	/*
 	{
 		int counter = 0;
 		
@@ -800,9 +796,10 @@ public:
 		color_graph();
 
 
-	}
+	}*/
 
-	void construct_graph(Graph& graph)
+void construct_graph(Graph& graph);
+/*
 	{
 		// step through the graph and add each gameplay node to space graph
 
@@ -920,9 +917,10 @@ public:
 		}
 
 
-	}
+	}*/
 
-	void build_constraint_map()
+void build_constraint_map();
+/*
 	{
 
 		EdgeLabel el = EdgeLabel::jump;
@@ -958,9 +956,10 @@ public:
 
 		
 
-	}
+	}*/
 
-	glm::vec3 random_pos()
+glm::vec3 random_pos();
+/*
 	{
 
 		float x = ((rand() % 1000) * 0.05f) - 25.f;
@@ -970,7 +969,7 @@ public:
 
 		return glm::vec3(x, y, z);
 
-	}
+	}*/
 
 	float speed = 1.5f;
 
@@ -978,7 +977,8 @@ public:
 	float repulsion_dist = 5.0f;
 	float attraction_dist = 6.0f;
 
-	void particle_update(float speed, float dt)
+	void particle_update(float speed, float dt);
+	/*
 	{
 		// for each particle
 		for (int i = 0; i < space_graph.size(); i++)
@@ -1036,10 +1036,11 @@ public:
 		}
 		
 
-	}
+	}*/
 
 
-	void update(float dt)
+	void update(float dt);
+	/*
 	{
 
 
@@ -1061,7 +1062,7 @@ public:
 
 						glm::vec3 dir = closest - space_graph[i].position;
 						//dir = glm::normalize(dir);
-						space_graph[i].position += /*glm::normalize(dir) * (i + 1.f) * dt +*/ dir * speed * dt;
+						space_graph[i].position +=  dir * speed * dt;
 
 						color_graph();
 						//return;
@@ -1080,9 +1081,10 @@ public:
 		}
 		color_graph();
 
-	}
+	}*/
 
-	void get_data(float& line, float& grad, int& unin, int& sequ)
+	void get_data(float& line, float& grad, int& unin, int& sequ);
+	/*
 	{
 
 
@@ -1275,7 +1277,7 @@ public:
 
 
 
-	}
+	}*/
 
 
 	std::vector<SpaceNode> space_graph;
