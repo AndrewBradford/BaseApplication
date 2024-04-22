@@ -18,7 +18,7 @@ namespace Hollow {
 
 
 
-
+	// handles frame-by-frame behaviour of the application
 	class StateBase
 	{
 		// store of shaders

@@ -15,120 +15,164 @@ Physics::~Physics()
 
 }
 
-bool Physics::trajectory_test(float velocity, float gravity, float angle, glm::vec3 origin, glm::vec3 point)
+void Physics::construct_graph(Graph& graph)
 {
-	// calculate distance vector and project onto xz plane
-	glm::vec3 proj = point - origin;
-	proj.y = 0.f;
+	// step through the graph and add each gameplay node to space graph
 
 
-	float point_x = glm::length(proj);
-	float point_y = (point - origin).y;
+	space_graph.clear();
 
-	float cosa = cosf(angle);
-	float traj_y = point_x * (tanf(angle) - (point_x * (gravity / (2 * velocity * velocity * cosa * cosa))));
+	// add each node to space graph
 
-	if (traj_y >= point_y)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	auto nodes = graph.get_nodes();
 
-
-}
-
-bool Physics::trajectory_test(TrajectoryInfo t, glm::vec3 origin, glm::vec3 point)
-{
-	return trajectory_test(t.velocity, t.gravity, t.angle, origin, point);
-}
-
-float Physics::get_angle_between_vectors2(glm::vec2 a, glm::vec2 b)
-{
-	float c = -1;
-	if (b.y < 0) { c = 1; }
-	return c * acosf(glm::dot(a, b) / (glm::length(a) * glm::length(b)));
-
-}
-
-float Physics::get_y_at_x(float velocity, float gravity, float angle, float x)
-{
-
-	float cosa = cosf(angle);
-	return x * (tanf(angle) - (x * (gravity / (2 * velocity * velocity * cosa * cosa))));
-
-}
-
-float Physics::get_y_at_x(TrajectoryInfo t, float x)
-{
-	return get_y_at_x(t.velocity, t.gravity, t.angle, x);
-}
-
-glm::vec3 Physics::get_closest_point(float velocity, float gravity, float angle, glm::vec3 origin, glm::vec3 point)
-{
-
-
-	glm::vec3 proj = point - origin;
-	proj.y = 0.f;
-
-
-	float point_x = glm::length(proj);
-	float point_y = (point - origin).y;
-
-
-	float a = point_x;
-	float b = point_y;
-
-	float c = tanf(angle);
-
-	float d = gravity / (2 * velocity * velocity * cosf(angle) * cosf(angle));
-
-	float closest_val = 1000000.f;
-	float closest_x = 0;
-
-	for (int i = 10; i < 1000; i++)
+	SpaceNode sn;
+	for (auto node : nodes)
 	{
 
-
-		float tx = float(i) * (100.f / 1000.f);
-		float ty = (tx * c) - (tx * tx * d);
-
-		float d2x = (powf(d, 2) * powf(tx, 4)) - (2 * c * d * powf(tx, 3)) + ((1 + powf(c, 2) + (2 * b * d)) * powf(tx, 2)) + ((-2 * a - (2 * c * b)) * tx) + powf(a, 2) + powf(b, 2);
-
-		if (d2x <= closest_val)
+		sn.name = node.second.get_name();
+		if (sn.name == "start")
 		{
-			closest_val = d2x;
-			closest_x = tx;
+			sn.position = glm::vec3(0, 0, 0);
+		}
+		else
+		{
+			sn.position = random_pos();
+		}
+		sn.is_hyper = false;
+
+		space_graph.push_back(sn);
+	}
+
+	// add each hyperedge to space graph
+
+	auto hyperedges = graph.get_hyperedges();
+
+	for (auto hyperedge : hyperedges)
+	{
+		sn.name = hyperedge.second.get_name();
+		sn.position = random_pos();
+		sn.is_hyper = true;
+		space_graph.push_back(sn);
+	}
+
+	// add each edge connection to space graph node constraints
+
+	auto edges = graph.get_edges();
+
+	for (auto edge : edges)
+	{
+		int source = -1;
+		int target = -1;
+
+		//find source and target nodes
+		for (int i = 0; i < space_graph.size(); i++)
+		{
+			if (space_graph[i].name == edge.second.get_source())
+			{
+				source = i;
+			}
+			if (space_graph[i].name == edge.second.get_target())
+			{
+				target = i;
+			}
+		}
+		if (source == -1 || target == -1)
+		{
+			continue;
 		}
 
+		//add constraint to target node
+		Constraint c;
+		c.t_info = constraint_map[edge.second.get_label()];
+		c.index = source;
+
+		space_graph[target].constraints.push_back(c);
+
+	}
+
+	//add each hyper edge connection to space graph node constraints
+
+	for (auto hyperedge : hyperedges)
+	{
+
+		std::vector<int> targets;
+		int source = -1;
+
+		//find source and target nodes
+		for (int i = 0; i < space_graph.size(); i++)
+		{
+			//find hyperedge
+			if (space_graph[i].name == hyperedge.second.get_name())
+			{
+				source = i;
+			}
+			//find each connected node
+			for (auto node : hyperedge.second.get_attachment_nodes())
+			{
+				if (space_graph[i].name == node)
+				{
+					targets.push_back(i);
+				}
+			}
+		}
+		if (source == -1 || targets.size() == 0)
+		{
+			continue;
+		}
+
+		//add constraint to target nodes
+		Constraint c;
+
+		for (int t : targets)
+		{
+			c.t_info = constraint_map[EdgeLabel::jump];
+			c.index = source;
+			c.is_hyper = true;
+
+			space_graph[t].constraints.push_back(c);
+		}
 	}
 
 
-	float closest_y = get_y_at_x(velocity, gravity, angle, closest_x);
-	proj = glm::normalize(proj);
-	proj *= closest_x;
-
-
-	glm::vec3 closest_point(proj.x, closest_y, proj.z);
-
-	return closest_point + origin;
-
-
-
 }
 
-glm::vec3 Physics::get_closest_point(TrajectoryInfo t, glm::vec3 origin, glm::vec3 point)
+void Physics::build_constraint_map()
 {
-	return get_closest_point(t.velocity, t.gravity, t.angle, origin, point);
-}
 
-glm::vec3 Physics::get_closest_crossover_point(TrajectoryInfo t1, TrajectoryInfo t2, glm::vec3 origin, glm::vec3 point1, glm::vec3 point2)
-{
-	glm::vec3 sol = glm::vec3(0, 0, 0);
+	EdgeLabel el = EdgeLabel::jump;
+	TrajectoryInfo t;
 
-	return sol;
+	constraint_map[el] = t;
+
+	t.velocity = 10.f;
+	t.angle = (7.f * 3.14f) / 16.f;
+	el = EdgeLabel::dive_spring;
+	constraint_map[el] = t;
+
+	el = EdgeLabel::backflip;
+	constraint_map[el] = t;
+
+	t.velocity = 15.f;
+	t.angle = 3.14f / 8.f;
+	el = EdgeLabel::long_jump;
+	constraint_map[el] = t;
+
+	el = EdgeLabel::kick;
+	constraint_map[el] = t;
+
+	el = EdgeLabel::deflect;
+	constraint_map[el] = t;
+
+
+	t.velocity = 10.f;
+	t.angle = -1.3f;
+	el = EdgeLabel::dive;
+	constraint_map[el] = t;
+
+
+
+
 }
 
 void Physics::make_test_graph(glm::vec3 dir, float z_offset, float stretch)
@@ -172,24 +216,6 @@ void Physics::make_test_graph(glm::vec3 dir, float z_offset, float stretch)
 
 	node++;
 
-
-	/*
-	sn.name = "branch mid";
-	sn.position = dir;
-	sn.position *= node * dist;
-	sn.position.z = z_offset;
-	sn.is_solid = true;
-	sn.constraints.clear();
-
-	//Constraint c;
-	c.index = 1;
-	c.t_info = constraint_map[EdgeLabel::long_jump];
-	sn.constraints.push_back(c);
-
-	//space_graph.push_back(sn);
-
-
-	node++;*/
 
 	// 2
 	sn.name = "mid";
@@ -603,15 +629,13 @@ void Physics::make_test_graph_big_branch(glm::vec3 dir, float z_offset, float st
 
 void Physics::color_graph()
 {
-
-
+	// color each constraint based on if satisfied or not
 	for (int i = 0; i < space_graph.size(); i++)
 	{
 		if (space_graph[i].constraints.size() > 0)
 		{
 			for (Constraint& c : space_graph[i].constraints)
 			{
-
 				//check if within trajectory
 				if (trajectory_test(c.t_info, space_graph[c.index].position, space_graph[i].position))
 				{
@@ -621,15 +645,126 @@ void Physics::color_graph()
 				{
 					c.color = no_col;
 				}
-
 			}
+		}
+	}
+
+}
+
+bool Physics::trajectory_test(float velocity, float gravity, float angle, glm::vec3 origin, glm::vec3 point)
+{
+	// calculate distance vector and project onto xz plane
+	glm::vec3 proj = point - origin;
+	proj.y = 0.f;
+
+
+	float point_x = glm::length(proj);
+	float point_y = (point - origin).y;
+
+	// calculate trajectory y
+	float cosa = cosf(angle);
+	float traj_y = point_x * (tanf(angle) - (point_x * (gravity / (2 * velocity * velocity * cosa * cosa))));
+
+	// compare point and trajectory heights
+	if (traj_y >= point_y)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+
+}
+
+bool Physics::trajectory_test(TrajectoryInfo t, glm::vec3 origin, glm::vec3 point)
+{
+	return trajectory_test(t.velocity, t.gravity, t.angle, origin, point);
+}
+
+float Physics::get_angle_between_vectors2(glm::vec2 a, glm::vec2 b)
+{
+	float c = -1;
+	if (b.y < 0) { c = 1; }
+	return c * acosf(glm::dot(a, b) / (glm::length(a) * glm::length(b)));
+
+}
+
+float Physics::get_y_at_x(float velocity, float gravity, float angle, float x)
+{
+	// calculate trajectory y
+	float cosa = cosf(angle);
+	return x * (tanf(angle) - (x * (gravity / (2 * velocity * velocity * cosa * cosa))));
+
+}
+
+float Physics::get_y_at_x(TrajectoryInfo t, float x)
+{
+	return get_y_at_x(t.velocity, t.gravity, t.angle, x);
+}
+
+glm::vec3 Physics::get_closest_point(float velocity, float gravity, float angle, glm::vec3 origin, glm::vec3 point)
+{
+
+
+	glm::vec3 proj = point - origin;
+	proj.y = 0.f;
+
+
+	float point_x = glm::length(proj);
+	float point_y = (point - origin).y;
+
+
+	float a = point_x;
+	float b = point_y;
+
+	float c = tanf(angle);
+	float d = gravity / (2 * velocity * velocity * cosf(angle) * cosf(angle));
+
+	float closest_val = 1000000.f;
+	float closest_x = 0;
+
+	// iterate over trajectory
+	for (int i = 10; i < 1000; i++)
+	{
+		// calculate distance from trajectory to point
+		float tx = float(i) * (100.f / 1000.f);
+		float ty = (tx * c) - (tx * tx * d);
+
+		float d2x = (powf(d, 2) * powf(tx, 4)) - (2 * c * d * powf(tx, 3)) + ((1 + powf(c, 2) + (2 * b * d)) * powf(tx, 2)) + ((-2 * a - (2 * c * b)) * tx) + powf(a, 2) + powf(b, 2);
+
+		// replace currently held point if closer
+		if (d2x <= closest_val)
+		{
+			closest_val = d2x;
+			closest_x = tx;
 		}
 
 	}
 
+	// find y at closest x point
+	float closest_y = get_y_at_x(velocity, gravity, angle, closest_x);
+	proj = glm::normalize(proj);
+	proj *= closest_x;
 
+	glm::vec3 closest_point(proj.x, closest_y, proj.z);
 
+	// closest point is relative to origin of trajectory
+	return closest_point + origin;
 
+}
+
+glm::vec3 Physics::get_closest_point(TrajectoryInfo t, glm::vec3 origin, glm::vec3 point)
+{
+	return get_closest_point(t.velocity, t.gravity, t.angle, origin, point);
+}
+
+glm::vec3 Physics::get_closest_crossover_point(TrajectoryInfo t1, TrajectoryInfo t2, glm::vec3 origin, glm::vec3 point1, glm::vec3 point2)
+{
+	glm::vec3 sol = glm::vec3(0, 0, 0);
+
+	return sol;
 }
 
 glm::vec3 Physics::overshoot(glm::vec3 a, glm::vec3 b, float amnt)
@@ -645,6 +780,7 @@ glm::vec3 Physics::overshoot(glm::vec3 a, glm::vec3 b, float amnt)
 
 bool Physics::constraints_resolved()
 {
+	// check all nodes
 	for (int i = 0; i < space_graph.size(); i++)
 	{
 		if (space_graph[i].constraints.size() > 0)
@@ -652,10 +788,10 @@ bool Physics::constraints_resolved()
 			for (const Constraint& c : space_graph[i].constraints)
 			{
 
-				//check if already within trajectory
+				//check if within trajectory
 				if (!trajectory_test(c.t_info, space_graph[c.index].position, space_graph[i].position))
 				{
-
+					// false if any node is not within trajectory
 					return false;
 
 				}
@@ -669,12 +805,13 @@ bool Physics::constraints_resolved()
 			}
 		}
 	}
+	// true if all nodes are within trajectory
 	return true;
 }
 
 void Physics::resolve_constraints()
 {
-
+	// loop over all nodes
 	for (int i = 0; i < space_graph.size(); i++)
 	{
 		if (space_graph[i].constraints.size() > 0)
@@ -704,6 +841,7 @@ void Physics::resolve_constraints()
 		}
 
 	}
+	// update trajectory colors
 	color_graph();
 
 }
@@ -714,7 +852,7 @@ void Physics::resolve_all_constraints()
 
 	while (!constraints_resolved())
 	{
-
+		// loop over all nodes
 		for (int i = 0; i < space_graph.size(); i++)
 		{
 			if (space_graph[i].constraints.size() > 0)
@@ -731,6 +869,7 @@ void Physics::resolve_all_constraints()
 
 						color_graph();
 						counter++;
+						// set a max loop count in case constraint cannot be resolved
 						if (counter >= 100)
 						{
 							return;
@@ -746,176 +885,6 @@ void Physics::resolve_all_constraints()
 	}
 	color_graph();
 
-
-}
-
-void Physics::construct_graph(Graph& graph)
-{
-	// step through the graph and add each gameplay node to space graph
-
-
-	space_graph.clear();
-
-	// add each node to space graph
-
-	auto nodes = graph.get_nodes();
-
-	SpaceNode sn;
-	for (auto node : nodes)
-	{
-
-		sn.name = node.second.get_name();
-		if (sn.name == "start")
-		{
-			sn.position = glm::vec3(0, 0, 0);
-		}
-		else
-		{
-			sn.position = random_pos();
-		}
-		sn.is_hyper = false;
-
-		space_graph.push_back(sn);
-	}
-
-	auto hyperedges = graph.get_hyperedges();
-
-	for (auto hyperedge : hyperedges)
-	{
-		sn.name = hyperedge.second.get_name();
-		sn.position = random_pos();
-		sn.is_hyper = true;
-		space_graph.push_back(sn);
-	}
-
-	// add each edge connection to space graph node constraints
-
-	auto edges = graph.get_edges();
-
-	for (auto edge : edges)
-	{
-		int source = -1;
-		int target = -1;
-
-		//find source and target nodes
-		for (int i = 0; i < space_graph.size(); i++)
-		{
-			if (space_graph[i].name == edge.second.get_source())
-			{
-				source = i;
-			}
-			if (space_graph[i].name == edge.second.get_target())
-			{
-				target = i;
-			}
-		}
-		if (source == -1 || target == -1)
-		{
-			continue;
-		}
-
-		//add constraint to target node
-		Constraint c;
-		c.t_info = constraint_map[edge.second.get_label()];
-		c.index = source;
-
-		space_graph[target].constraints.push_back(c);
-
-	}
-
-	//add each hyper edge connection to space graph node constraints
-
-	for (auto hyperedge : hyperedges)
-	{
-
-		std::vector<int> targets;
-		int source = -1;
-
-		//find source and target nodes
-		for (int i = 0; i < space_graph.size(); i++)
-		{
-			//find hyperedge
-			if (space_graph[i].name == hyperedge.second.get_name())
-			{
-				source = i;
-			}
-			//find each connected node
-			for (auto node : hyperedge.second.get_attachment_nodes())
-			{
-				if (space_graph[i].name == node)
-				{
-					targets.push_back(i);
-				}
-			}
-		}
-		if (source == -1 || targets.size() == 0)
-		{
-			continue;
-		}
-
-		//add constraint to target nodes
-		Constraint c;
-
-		for (int t : targets)
-		{
-			c.t_info = constraint_map[EdgeLabel::jump];
-			c.index = source;
-			c.is_hyper = true;
-
-			space_graph[t].constraints.push_back(c);
-		}
-	}
-
-
-}
-
-void Physics::build_constraint_map()
-{
-
-	EdgeLabel el = EdgeLabel::jump;
-	TrajectoryInfo t;
-
-	constraint_map[el] = t;
-
-	t.velocity = 10.f;
-	t.angle = (7.f * 3.14f) / 16.f;
-	el = EdgeLabel::dive_spring;
-	constraint_map[el] = t;
-
-	el = EdgeLabel::backflip;
-	constraint_map[el] = t;
-
-	t.velocity = 15.f;
-	t.angle = 3.14f / 8.f;
-	el = EdgeLabel::long_jump;
-	constraint_map[el] = t;
-
-	el = EdgeLabel::kick;
-	constraint_map[el] = t;
-
-	el = EdgeLabel::deflect;
-	constraint_map[el] = t;
-
-
-	t.velocity = 10.f;
-	t.angle = -1.3f;
-	el = EdgeLabel::dive;
-	constraint_map[el] = t;
-
-
-
-
-}
-
-glm::vec3 Physics::random_pos()
-{
-
-	float x = ((rand() % 1000) * 0.05f) - 25.f;
-	float y = ((rand() % 1000) * 0.05f) - 25.f;
-	float z = ((rand() % 1000) * 0.05f) - 25.f;
-
-
-	return glm::vec3(x, y, z);
 
 }
 
@@ -981,9 +950,7 @@ void Physics::particle_update(float speed, float dt)
 
 void Physics::update(float dt)
 {
-
-
-
+	// ----- not working ------
 
 	for (int i = 0; i < space_graph.size(); i++)
 	{
@@ -1216,3 +1183,16 @@ void Physics::get_data(float& line, float& grad, int& unin, int& sequ)
 
 
 }
+
+glm::vec3 Physics::random_pos()
+{
+	// calculate random position in 50-unit cube (origin as centre)
+	float x = ((rand() % 1000) * 0.05f) - 25.f;
+	float y = ((rand() % 1000) * 0.05f) - 25.f;
+	float z = ((rand() % 1000) * 0.05f) - 25.f;
+
+
+	return glm::vec3(x, y, z);
+
+}
+
