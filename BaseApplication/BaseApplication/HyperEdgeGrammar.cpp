@@ -122,21 +122,21 @@ void Node::copy_elements_to_node(Node* n)
 void Node::update_name_in_connected_elements(Graph* level_graph, std::string new_name)
 {
 
-	// copy hyperedges to node
+	// update each hyperedge reference
 	for (std::string h : hyperedges)
 	{
 		Hyperedge* hptr = level_graph->get_hyperedge_from_name(h);
 		hptr->update_node_name(name, new_name);
 	}
 
-	// copy source edges to node
+	// update each source edge reference
 	for (std::string es : edges_source)
 	{
 		Edge* esptr = level_graph->get_edge_from_name(es);
 		esptr->update_source_name(new_name);
 	}
 
-	// copy target edges to node
+	// update each target edge reference
 	for (std::string et : edges_target)
 	{
 		Edge* etptr = level_graph->get_edge_from_name(et);
@@ -1041,7 +1041,6 @@ void HyperEdgeGrammar::reset_graph()
 
 void HyperEdgeGrammar::generate_graph(GLFWwindow* window)
 {
-
 
 	if (level_graph.do_hyperedges_remain())
 	{
