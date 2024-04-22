@@ -5,7 +5,7 @@ namespace Hollow {
 
 
 
-
+	// contains the vertices for a particular shape
 	class Shape
 	{
 	public:

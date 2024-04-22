@@ -3,6 +3,7 @@
 
 namespace Hollow {
 
+	// which directions are the player moving in
 	struct Movement {
 		bool Forward = false;
 		bool Backward = false;
@@ -10,6 +11,7 @@ namespace Hollow {
 		bool Right = false;
 	};
 
+	// class manages the state of all tracked inputs
 	class Input
 	{
 
@@ -18,12 +20,14 @@ namespace Hollow {
 
 		enum KEYS {W, S, A, D, ESC};
 
+
 		bool isKeyPressed(KEYS k) 
 		{
 			bool t = keyStates[k];
 			keyStates[k] = false;
 			return t;
 		};
+		
 		
 		bool isKeyDown(KEYS k) 
 		{

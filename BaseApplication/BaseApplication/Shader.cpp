@@ -7,7 +7,7 @@ namespace Hollow {
 
 	Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	{
-		//mostly copied from learnopengl
+		//mostly copied from learnopengl https://learnopengl.com/Getting-started/Shaders
 		//retrieve shader code
 
 		std::string vertexCode;

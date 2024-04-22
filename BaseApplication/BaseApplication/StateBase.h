@@ -21,7 +21,7 @@ namespace Hollow {
 
 	class StateBase
 	{
-
+		// store of shaders
 		struct Shaders {
 			LitShader litShader;
 			FlatShader flatShader;
@@ -29,6 +29,7 @@ namespace Hollow {
 			TrajShader trajShader;
 		};
 
+		// game object information
 		struct GObject {
 			glm::vec3 color;
 			glm::vec3 position;
@@ -36,6 +37,7 @@ namespace Hollow {
 			glm::vec3 scale;
 		};
 
+		// Light information
 		struct Light {
 			glm::vec3 color;
 			glm::vec3 position;
@@ -48,25 +50,40 @@ namespace Hollow {
 
 		void Init(GLFWwindow* window);
 
+		// app behaviour during a frame
 		void frame(float dt, GLFWwindow* window, Input* in);
 
+		// handle non-ui mouse and keyboard inputs
 		void processInput(float dt, GLFWwindow* window, Input* in);
 
 		void Cleanup();
 
-
+		// show gui and respond to inputs
 		void gui(GLFWwindow* window);
 
+		// draw level
 		void draw_space_graph();
+
+		// draw demo of trajectory physics
 		void DrawTrajectoryDemo();
+		//
 		void DrawLevel();
 
 	private:
 
+		// show and handle controls pertaining to main function
 		void ShowMainControls(GLFWwindow* window);
+
+		// show and handle controls relating to trajectory demo
 		void ShowTrajectoryDemoControls();
+
+		// show and handle controls related to example levels + extra controls
 		void ShowExampleLevelControls();
+
+		// show and handle controls related to data collection
 		void ShowDataCollectionControls(GLFWwindow* window);
+
+		// draw trajectory physics graphs
 		void ShowGraphs();
 
 
@@ -108,7 +125,7 @@ namespace Hollow {
 
 		bool is_point_in;
 
-
+		// colours
 		glm::vec3 yes_col;
 		glm::vec3 no_col;
 
@@ -127,15 +144,15 @@ namespace Hollow {
 		float speed = 20.f;
 
 		bool show_rotations = false;
-		int traj_its = 10;
+		int traj_its = 15;
 
 		float point_angle = 0;
-		float point_mag = 1;
-		float point_height = 0;
+		//float point_mag = 1;
+		//float point_height = 0;
 
 
-		float xs[3] = { 0,1,2 };
-		float ys[3] = { 5,10,2 };
+		//float xs[3] = { 0,1,2 };
+		//float ys[3] = { 5,10,2 };
 
 		float traj_xs[1000];
 		float traj_ys[1000];
@@ -163,7 +180,7 @@ namespace Hollow {
 
 		bool show_process = false;
 
-		float move_point = 0.f;
+		//float move_point = 0.f;
 
 		bool only_low = true;
 		bool only_high = true;

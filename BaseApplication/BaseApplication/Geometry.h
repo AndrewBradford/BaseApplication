@@ -12,7 +12,7 @@ namespace Hollow {
 
 	
 
-
+	// Vertex Buffer Object wrapper
 	struct VBuffer
 	{
 		unsigned int ID;
@@ -28,6 +28,7 @@ namespace Hollow {
 
 	};
 
+	// Element Buffer Object wrapper
 	struct EBuffer
 	{
 		bool used = false;
@@ -35,6 +36,7 @@ namespace Hollow {
 		unsigned int indexNum;
 	};
 
+	// definition of what elements vertex uses
 	struct VertexUsage 
 	{
 		bool useNormal;
@@ -42,6 +44,7 @@ namespace Hollow {
 		bool useTexCoord;
 	};
 
+	// Vertex Array Object wrapper
 	struct VArray
 	{
 		unsigned int ID;
@@ -49,6 +52,7 @@ namespace Hollow {
 		VBuffer VBO;
 		EBuffer EBO;
 
+		// which vertex attributes are used
 		bool useNormal;
 		bool useColor;
 		bool useTexCoord;
@@ -63,11 +67,19 @@ namespace Hollow {
 
 	public:
 
+		//set up vertex array object based on shape vertices
 		static VArray SetupVAO(Hollow::Shape* shape);
+
+		//set up vertex array object based on shape, using existing vertex buffer object
 		static VArray SetupVAO(Hollow::Shape* shape, VBuffer VBO);
+
+		// draw a vertex array as triangles
 		static void DrawVArray(VArray VAO);
 
+		//draw a vertex array as lines
 		static void DrawVArrayLine(VArray VAO);
+
+		//draw a vertex array as a line strip
 		static void DrawVArrayLineStrip(VArray VAO);
 
 	private:
