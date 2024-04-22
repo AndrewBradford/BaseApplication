@@ -22,33 +22,42 @@ Uses OpenGl for graphics rendering, ImGui for user interface and GLFW for window
 
 
 #### StateBase
-[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/StateBase.h)[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/StateBase.cpp)
+[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/StateBase.h)
+[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/StateBase.cpp)
 
 Contains app behaviour in frame() function, called by Application each frame. Handles Rendering and ui, and triggers gameplay and game space code.
 
 #### HyperEdgeGrammar
-[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/HyperEdgeGrammar.h)[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/HyperEdgeGrammar.cpp)
+[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/HyperEdgeGrammar.h)
+
+[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/HyperEdgeGrammar.cpp)
 
 Contains all data and code related to gameplay generation.
 
 #### Physics
-[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Physics.h)[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Physics.cpp)
+[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Physics.h)
 
-Containts all data and code related to game space generation.
+[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Physics.cpp)
+
+Contains all data and code related to game space generation.
 
 ## Application Class Diagram
 
-
+![ ](https://github.com/AndrewBradford/BaseApplication/blob/master/AppClasses.png)
 
 ## Other Classes
 
 #### Application
-[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Application.h)[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Application.cpp)
+[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Application.h)
+
+[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Application.cpp)
 
 Sets up OpenGL (rendering), ImGui (UI), GLFW (window and input), and StateBase.
 
 #### Shader
-[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Shader.h)[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Shader.cpp)
+[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Shader.h)
+
+[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Shader.cpp)
 
 Loads and activates shaders.
 
@@ -57,7 +66,9 @@ Loads and activates shaders.
 Location of various vertex and fragment shaders used to render objects.
 
 #### Geometry
-[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Geometry.h)[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Geometry.cpp)
+[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Geometry.h)
+
+[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Geometry.cpp)
 
 Static class which handles setting up vertex arrays and other OpenGL objects, and draw calls.
 
@@ -67,17 +78,17 @@ Static class which handles setting up vertex arrays and other OpenGL objects, an
 Holds vertex data for various basic shapes, used to setup vertex arrays.
 
 #### Input
-[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Input.h)[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Input.cpp)
+[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Input.h)
+
+[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Input.cpp)
 
 Holds state of tracked inputs.
 
-#### Camera
-[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Camera.h)[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Camera.cpp)
+#### Camera  [.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Camera.h)  [.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Camera.cpp)
 
 Handles camera movement.
 
-#### Renderer
-[.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Renderer.h)[.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Renderer.cpp)
+#### Renderer [.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Renderer.h) [.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Renderer.cpp)
 
 Holds unused rendering code.
 
