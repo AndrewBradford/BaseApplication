@@ -66,7 +66,7 @@ namespace Hollow {
 		void ShowMainControls(GLFWwindow* window);
 		void ShowTrajectoryDemoControls();
 		void ShowExampleLevelControls();
-		void ShowDataCollectionControls();
+		void ShowDataCollectionControls(GLFWwindow* window);
 		void ShowGraphs();
 
 
@@ -164,6 +164,10 @@ namespace Hollow {
 		bool show_process = false;
 
 		float move_point = 0.f;
+
+		bool only_low = true;
+		bool only_high = true;
+
 
 	};
 

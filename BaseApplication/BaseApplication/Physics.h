@@ -1082,6 +1082,201 @@ public:
 
 	}
 
+	void get_data(float& line, float& grad, int& unin, int& sequ)
+	{
+
+
+		// calculate linearity
+		float total_dot = 0;
+		int dot_count = 0;
+		
+
+		//for each node apart from the first and last ones
+		for (int i = 1; i < space_graph.size() - 1; i++)
+		{
+			for (auto& c : space_graph[i].constraints)
+			{
+				//calculate the dot product between edges before and after node
+				glm::vec3 first = space_graph[i].position - space_graph[c.index].position;
+
+				glm::vec3 second;
+
+				bool got = false;
+				for (int j = 0; j < space_graph.size(); j++)
+				{
+					for (auto& cj : space_graph[j].constraints)
+					{
+						if (cj.index == i)
+						{
+							second = space_graph[j].position - space_graph[i].position;
+							got = true;
+							break;
+						}
+					}
+				}
+
+				if (got)
+				{
+					float dot = glm::dot(glm::normalize(first), glm::normalize(second));
+					total_dot += ((dot * -1.f) + 1) * 0.5;
+					dot_count += 1;
+				}
+
+
+			}
+		}
+		//calculate average dot
+		line = total_dot / (1.0f * dot_count);
+
+
+		if (space_graph.size() <= 2 || dot_count == 0)
+		{
+			line = 0.f;
+		}
+
+
+
+		// calculate gradient
+		 
+		int gradient_count = 0;
+				
+		// for each node, check if it is lower or higher than its constraint nodes
+		for (int i = 0; i < space_graph.size(); i++)
+		{
+
+			for (auto& c : space_graph[i].constraints)
+			{
+				if (space_graph[i].position.y >= space_graph[c.index].position.y)
+				{
+					gradient_count += 1;
+				}
+				else
+				{
+					gradient_count -= 1;
+				}
+			
+			}
+
+
+		}
+		//calculate as percentage of total edges
+		grad = (1.0f * gradient_count) / (1.0f * (space_graph.size() - 1));
+
+
+
+		// calculate unintended gameplay + sequence breaking
+
+		int unintended_count = 0;
+		int sequence_count = 0;
+
+		// for each combination of nodes 
+		// i is the origin node and j is node to get to
+		for (int i = 0; i < space_graph.size(); i++)
+		{
+			for (int j = 0; j < space_graph.size(); j++)
+			{
+				if (i == j)
+				{
+					break;
+				}
+
+				bool isIntended = false;
+				EdgeLabel intendedMove = EdgeLabel::jump;
+				for (auto& c : space_graph[j].constraints)
+				{
+					if (c.index == i)
+					{
+						isIntended = true;
+						for (auto& m : constraint_map)
+						{
+							if (m.second.angle == c.t_info.angle && m.second.velocity == c.t_info.velocity)
+							{
+								intendedMove = m.first;
+							}
+						}
+					}
+				}
+
+				//check if second can be reached from first by each move
+				for (auto& move : constraint_map)
+				{
+					if (isIntended && move.first == intendedMove)
+					{
+						break;
+					}
+
+
+					if (trajectory_test(move.second, space_graph[i].position, space_graph[j].position))
+					{
+						
+						unintended_count += 1;
+
+						//check if sequence breaking 
+						if (j < i && !isIntended)
+						{
+							//sequence_count += 1;
+						}
+
+						int end_node = 0;
+
+						for (int k = 0; k < space_graph.size(); k++)
+						{
+							if (space_graph[k].name == "end")
+							{
+								end_node = k;
+								break;
+							}
+						}
+
+
+						int cur_node = end_node;
+						while (true)
+						{
+
+							if (space_graph[cur_node].constraints.size() == 0)
+							{
+								break;
+							}
+							int looking_at = cur_node;
+							bool done = false;
+							for (auto& ce : space_graph[cur_node].constraints)
+							{
+								
+								if (ce.index == i || cur_node == i)
+								{
+									done = true;
+									break;
+								}
+								if (ce.index == j || cur_node == j)
+								{
+									sequence_count += 1;
+									done = true;
+									break;
+								}
+								looking_at = ce.index;
+							}
+							if (done) { break; }
+							cur_node = looking_at;
+						}
+
+					}
+
+
+				}
+			}
+		}
+
+		unin = unintended_count;
+		sequ = sequence_count;
+
+
+		
+
+
+
+
+	}
+
 
 	std::vector<SpaceNode> space_graph;
 private:

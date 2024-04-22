@@ -15,7 +15,7 @@
 
 #include "implot.h"
 
-
+#include <fstream>
 
 namespace Hollow {
 
@@ -463,7 +463,7 @@ namespace Hollow {
 		}*/
 
 		ShowMainControls(window);
-		ShowDataCollectionControls();
+		ShowDataCollectionControls(window);
 		ShowTrajectoryDemoControls();
 
 		ShowExampleLevelControls();
@@ -918,19 +918,142 @@ namespace Hollow {
 		}
 	}
 
-	void StateBase::ShowDataCollectionControls()
+	void StateBase::ShowDataCollectionControls(GLFWwindow* window)
 	{
 
 		if (ImGui::CollapsingHeader("Data Collection"))
 		{
+			ImGui::Checkbox("Only Include Low Sequence Lengths", &only_low);
+			ImGui::Checkbox("Only Include High Sequence Lengths", &only_high);
 
-			if (ImGui::Button("Collect Data"))
+
+			if (ImGui::Button("Show Data for Current Level"))
 			{
+
+				int difficulty;
+				int variety;
+				float linearity;
+				float gradient;
+				int unintended_gameplay;
+				int sequence_breaking;
+
+
+				grammar.get_data(difficulty, variety);
+				phys.get_data(linearity, gradient, unintended_gameplay, sequence_breaking);
+
+				std::cout << difficulty << "," << variety << "," << linearity << "," << gradient << "," << unintended_gameplay << "," << sequence_breaking << "\n";
 
 			}
 
 
+			if (ImGui::Button("Collect Data"))
+			{
+				int Iterations = 1000;
+
+				std::ofstream DataFile("Data.csv");
+
+
+				for (int i = 0; i < Iterations; )
+				{
+
+					int difficulty;
+					int variety;
+					float linearity;
+					float gradient;
+					int unintended_gameplay;
+					int sequence_breaking;
+
+
+					//reset gameplay graph
+					grammar.reset_graph();
+
+					//perform all trasformations
+					grammar.GenerateWholeGraph(window);
+
+					//generate random game space
+					Graph gameplay_graph = grammar.get_output_graph();
+					phys.construct_graph(gameplay_graph);
+
+					//resolve all constraints
+					phys.resolve_all_constraints();
+
+					grammar.get_data(difficulty, variety);
+					phys.get_data(linearity, gradient, unintended_gameplay, sequence_breaking);
+
+					if (difficulty > 3 && only_low)
+					{
+						continue;
+					}
+					if (difficulty <= 5 && only_high)
+					{
+						continue;
+					}
+					i++;
+
+					DataFile << difficulty << "," << variety << "," << linearity << "," << gradient << "," << unintended_gameplay << "," << sequence_breaking << "\n";
+
+
+				}
+
+			}
+
+
+			if (ImGui::Button("Collect Game Space Data for Single Gameplay Graph"))
+			{
+				int Iterations = 1000;
+
+				std::ofstream DataFile("Data.csv");
+
+				int difficulty = 0;
+				int variety;
+
+				while (difficulty != 5)
+				{
+
+					//reset gameplay graph
+					grammar.reset_graph();
+
+					//perform all trasformations
+					grammar.GenerateWholeGraph(window);
+
+					grammar.get_data(difficulty, variety);
+				}
+
+
+				for (int i = 0; i < Iterations; )
+				{
+
+					float linearity;
+					float gradient;
+					int unintended_gameplay;
+					int sequence_breaking;
+
+
+
+					//generate random game space
+					Graph gameplay_graph = grammar.get_output_graph();
+					phys.construct_graph(gameplay_graph);
+
+					//resolve all constraints
+					phys.resolve_all_constraints();
+
+					grammar.get_data(difficulty, variety);
+					phys.get_data(linearity, gradient, unintended_gameplay, sequence_breaking);
+
+					i++;
+
+					DataFile << difficulty << "," << variety << "," << linearity << "," << gradient << "," << unintended_gameplay << "," << sequence_breaking << "\n";
+
+
+				}
+
+			}
+
 		}
+
+
+
+
 
 
 	}

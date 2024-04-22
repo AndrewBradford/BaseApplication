@@ -174,11 +174,6 @@ namespace Hollow {
 			//update current state + render
 			currentState->frame(deltaTime, window, &input);
 
-
-
-
-
-
 			
 
 			//render imgui

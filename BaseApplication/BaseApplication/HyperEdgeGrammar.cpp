@@ -1112,6 +1112,71 @@ void HyperEdgeGrammar::GenerateWholeGraph(GLFWwindow* window)
 
 }
 
+
+void HyperEdgeGrammar::get_data(int& diff, int& vari)
+{
+
+	diff = level_graph.get_edges().size();
+
+
+	std::map<EdgeLabel, bool> moves;
+	moves[EdgeLabel::jump] = false;
+	moves[EdgeLabel::long_jump] = false;
+	moves[EdgeLabel::backflip] = false;
+	moves[EdgeLabel::dive] = false;
+	moves[EdgeLabel::dive_spring] = false;
+	moves[EdgeLabel::kick] = false;
+	moves[EdgeLabel::deflect] = false;
+
+
+	for (auto& e : level_graph.get_edges())
+	{
+		moves[e.second.get_label()] = true;
+	}
+
+	vari = 0;
+	for (auto& move : moves)
+	{
+		if (move.second)
+		{
+			vari += 1;
+		}
+	}
+
+}
+
+void HyperEdgeGrammar::get_dist(int& num, int& jumps, int& ljumps, int& bflips, int& dives, int& dsprings, int& kicks, int& deflects)
+{
+
+	num += level_graph.get_edges().size();
+
+
+	std::map<EdgeLabel, int> moves;
+	moves[EdgeLabel::jump] = 0;
+	moves[EdgeLabel::long_jump] = 0;
+	moves[EdgeLabel::backflip] = 0;
+	moves[EdgeLabel::dive] = 0;
+	moves[EdgeLabel::dive_spring] = 0;
+	moves[EdgeLabel::kick] = 0;
+	moves[EdgeLabel::deflect] = 0;
+
+
+	for (auto& e : level_graph.get_edges())
+	{
+		moves[e.second.get_label()] += 1;
+	}
+
+	jumps += moves[EdgeLabel::jump];
+	ljumps += moves[EdgeLabel::long_jump];
+	bflips += moves[EdgeLabel::backflip];
+	dives += moves[EdgeLabel::dive];
+	dsprings += moves[EdgeLabel::dive_spring];
+	kicks += moves[EdgeLabel::kick];
+	deflects += moves[EdgeLabel::deflect];
+
+
+}
+
 Graph HyperEdgeGrammar::get_output_graph()
 {
 	return level_graph;

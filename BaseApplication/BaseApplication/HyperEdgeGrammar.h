@@ -243,6 +243,9 @@ public:
 	void GenerateWholeGraph(GLFWwindow* window);
 	
 
+	void get_data(int& diff, int& vari);
+	void get_dist(int& num, int& jumps, int& ljumps, int& bflips, int& dives, int& dsprings, int& kicks, int& deflects);
+
 	Graph get_output_graph();
 
 	void copy_current_graph(GLFWwindow* window);
