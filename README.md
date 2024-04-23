@@ -15,6 +15,8 @@ Generates a gameplay graph using a hyperedge replacement graph grammar system an
 
 Uses OpenGl for graphics rendering, ImGui for user interface and GLFW for window and input functionality. Also uses ImPlot for graph rendering within ImGui.
 
+## [Demo Video](https://youtu.be/67lgHdFz8fA)
+
 ## Code Overview
 
 ### Main Classes
@@ -65,6 +67,7 @@ Handles camera movement.
 #### Renderer [.h](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Renderer.h) / [.cpp](https://github.com/AndrewBradford/BaseApplication/blob/master/BaseApplication/BaseApplication/Renderer.cpp)
 
 Holds unused rendering code.
+
 
 
 
